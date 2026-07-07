@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jornada Matemática</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/poppins@5.0.8/index.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* ===== TELA INICIAL ===== */
+.screen {
+  display: none;
+  min-height: 100vh;
+  padding: 20px;
+  animation: fadeIn 0.6s ease;
+}
+.screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.title {
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 800;
+  background: linear-gradient(90deg, #00f5a0, #00d9f5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  margin-bottom: 10px;
+  text-shadow: 0 0 40px rgba(0,245,160,0.3);
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #b8b8d4;
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 600px;
+}
+
+.modes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  max-width: 900px;
+  width: 100%;
+}
+
+.mode-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 30px 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.mode-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.6s;
+}
+
+.mode-card:hover::before { left: 100%; }
+
+.mode-card:hover {
+  transform: translateY(-8px);
+  border-color: #00f5a0;
+  box-shadow: 0 10px 40px rgba(0,245,160,0.2);
+}
+
+.mode-icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.mode-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.mode-desc {
+  color: #b8b8d4;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* ===== TOPO DO JOGO ===== */
+.game-header {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 15px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.stat-icon { font-size: 1.3rem; }
+.stat-value { color: #00f5a0; }
+
+.btn-back {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.btn-back:hover { background: rgba(255,255,255,0.2); }
+
+/* ===== MAPA ===== */
+.map-container {
+  width: 100%;
+  max-width: 1200px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 30px;
+  min-height: 500px;
+  position: relative;
+  overflow: hidden;
+}
+
+.map-svg {
+  width: 100%;
+  height: 500px;
+}
+
+.map-node {
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.map-node:hover circle {
+  filter: drop-shadow(0 0 15px currentColor);
+}
+
+.node-label {
+  fill: #fff;
+  font-size: 11px;
+  text-anchor: middle;
+  pointer-events: none;
+  font-weight: 600;
+}
+
+.path-line {
+  stroke: rgba(255,255,255,0.15);
+  stroke-width: 3;
+  stroke-dasharray: 8 4;
+}
+
+.path-line.active {
+  stroke: #00f5a0;
+  filter: drop-shadow(0 0 5px #00f5a0);
+  stroke-dasharray: none;
+}
+
+/* ===== MODAL DESAFIO ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s;
+}
+.modal-overlay.active { display: flex; }
+
+.modal {
+  background: linear-gradient(135deg, #1a1a3e, #2d2d5f);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 25px;
+  padding: 40px 35px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+  animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px; right: 15px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #fff;
+  width: 35px; height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+}
+.modal-close:hover { background: rgba(255,0,0,0.3); }
+
+.challenge-type {
+  display: inline-block;
+  padding: 5px 15px;
+  background: rgba(0,245,160,0.15);
+  color: #00f5a0;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.challenge-question {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 700;
+  margin: 20px 0;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.challenge-hint {
+  color: #b8b8d4;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+/* Timer */
+.timer-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00f5a0, #00d9f5);
+  border-radius: 4px;
+  transition: width 0.1s linear, background 0.3s;
+  width: 100%;
+}
+
+.timer-fill.warning { background: linear-gradient(90deg, #ffa500, #ff6b00); }
+.timer-fill.danger { background: linear-gradient(90deg, #ff4444, #cc0000); }
+
+.timer-text {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #00f5a0;
+  margin-bottom: 15px;
+}
+
+/* Input */
+.answer-input {
+  width: 100%;
+  padding: 15px 20px;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1.3rem;
+  text-align: center;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.2s;
+  margin-bottom: 15px;
+}
+
+.answer-input:focus {
+  border-color: #00f5a0;
+  box-shadow: 0 0 0 4px rgba(0,245,160,0.15);
+}
+
+/* Opções */
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.option-btn {
+  padding: 15px;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.option-btn:hover {
+  background: rgba(0,245,160,0.15);
+  border-color: #00f5a0;
+  transform: translateY(-2px);
+}
+
+.option-btn.correct {
+  background: rgba(0,245,160,0.3);
+  border-color: #00f5a0;
+  animation: correctPulse 0.5s;
+}
+
+.option-btn.wrong {
+  background: rgba(255,68,68,0.3);
+  border-color: #ff4444;
+  animation: shake 0.4s;
+}
+
+@keyframes correctPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #00f5a0, #00d9f5);
+  border: none;
+  border-radius: 12px;
+  color: #0f0c29;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0,245,160,0.3);
+}
+
+.btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Feedback */
+.feedback {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  display: none;
+  animation: fadeIn 0.3s;
+}
+
+.feedback.show { display: block; }
+.feedback.success { background: rgba(0,245,160,0.15); color: #00f5a0; }
+.feedback.error { background: rgba(255,68,68,0.15); color: #ff6b6b; }
+
+/* ===== TELA FINAL ===== */
+.final-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  max-width: 600px;
+  width: 100%;
+  margin: 30px 0;
+}
+
+.final-stat {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+}
+
+.final-stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #00f5a0;
+  margin-bottom: 5px;
+}
+
+.final-stat-label {
+  font-size: 0.85rem;
+  color: #b8b8d4;
+}
+
+.btn-primary {
+  padding: 15px 40px;
+  background: linear-gradient(135deg, #00f5a0, #00d9f5);
+  border: none;
+  border-radius: 12px;
+  color: #0f0c29;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 5px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0,245,160,0.3);
+}
+
+/* ===== PARTÍCULAS ===== */
+.particle {
+  position: fixed;
+  pointer-events: none;
+  font-size: 1.5rem;
+  z-index: 200;
+  animation: particleFloat 1s ease-out forwards;
+}
+
+@keyframes particleFloat {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), -100px) scale(0.3); opacity: 0; }
+}
+
+/* ===== PERSONAGEM ===== */
+.character {
+  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 0 10px #00f5a0);
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 600px) {
+  .game-header { flex-direction: column; }
+  .map-svg { height: 400px; }
+  .modal { padding: 30px 20px; }
+  .options-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TELA INICIAL -->
+<div class="screen active" id="screen-home">
+  <h1 class="title">🧮 Jornada Matemática</h1>
+  <p class="subtitle">Avance pelo mapa resolvendo equações, desafios de tabuada e caminhos lógicos. Cada resposta correta abre o próximo passo da sua jornada!</p>
+  
+  <div class="modes-grid">
+    <div class="mode-card" onclick="startGame('equations')">
+      <span class="mode-icon">📐</span>
+      <h3 class="mode-title">Equações</h3>
+      <p class="mode-desc">Resolva equações de diferentes níveis e avance pelo mapa da álgebra.</p>
+    </div>
+    <div class="mode-card" onclick="startGame('multiplication')">
+      <span class="mode-icon">⏱️</span>
+      <h3 class="mode-title">Tabuada Cronometrada</h3>
+      <p class="mode-desc">Desafie sua velocidade! Responda multiplicações antes do tempo acabar.</p>
+    </div>
+    <div class="mode-card" onclick="startGame('logic')">
+      <span class="mode-icon">🧩</span>
+      <h3 class="mode-title">Caminhos Lógicos</h3>
+      <p class="mode-desc">Descubra padrões e sequências para desbloquear o próximo passo.</p>
+    </div>
+  </div>
+</div>
+
+<!-- TELA DO JOGO -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <button class="btn-back" onclick="goHome()">← Menu</button>
+    <div class="stat">
+      <span class="stat-icon">🎯</span>
+      <span>Nível: <span class="stat-value" id="current-level">1</span>/10</span>
+    </div>
+    <div class="stat">
+      <span class="stat-icon">⭐</span>
+      <span>Pontos: <span class="stat-value" id="score">0</span></span>
+    </div>
+    <div class="stat">
+      <span class="stat-icon">✅</span>
+      <span>Acertos: <span class="stat-value" id="hits">0</span></span>
+    </div>
+  </div>
+  
+  <div class="map-container">
+    <svg class="map-svg" id="map-svg" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+</div>
+
+<!-- TELA FINAL -->
+<div class="screen" id="screen-final">
+  <h1 class="title">🏆 Jornada Concluída!</h1>
+  <p class="subtitle" id="final-message">Parabéns! Você completou todos os desafios.</p>
+  
+  <div class="final-stats">
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-score">0</div>
+      <div class="final-stat-label">Pontos</div>
+    </div>
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-hits">0</div>
+      <div class="final-stat-label">Acertos</div>
+    </div>
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-accuracy">0%</div>
+      <div class="final-stat-label">Precisão</div>
+    </div>
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-time">0s</div>
+      <div class="final-stat-label">Tempo</div>
+    </div>
+  </div>
+  
+  <div>
+    <button class="btn-primary" onclick="goHome()">🏠 Menu Principal</button>
+    <button class="btn-primary" onclick="restartGame()">🔄 Jogar Novamente</button>
+  </div>
+</div>
+
+<!-- MODAL DE DESAFIO -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <span class="challenge-type" id="challenge-type">Desafio</span>
+    <div class="challenge-question" id="challenge-question">?</div>
+    <div class="challenge-hint" id="challenge-hint"></div>
+    
+    <div id="timer-container" style="display:none;">
+      <div class="timer-bar">
+        <div class="timer-fill" id="timer-fill"></div>
+      </div>
+      <div class="timer-text" id="timer-text">10s</div>
+    </div>
+    
+    <div id="answer-area"></div>
+    
+    <button class="btn-submit" id="btn-submit" onclick="submitAnswer()" style="display:none;">Confirmar</button>
+    
+    <div class="feedback" id="feedback"></div>
+  </div>
+</div>
+
+<script>
+// ===== ESTADO DO JOGO =====
+let gameState = {
+  mode: null,
+  currentLevel: 0,
+  totalLevels: 10,
+  score: 0,
+  hits: 0,
+  attempts: 0,
+  startTime: null,
+  currentChallenge: null,
+  timerInterval: null,
+  timeLeft: 0,
+  nodes: []
+};
+
+// ===== NAVEGAÇÃO =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  clearInterval(gameState.timerInterval);
+  closeModal();
+  showScreen('screen-home');
+}
+
+// ===== INICIAR JOGO =====
+function startGame(mode) {
+  gameState = {
+    mode,
+    currentLevel: 0,
+    totalLevels: 10,
+    score: 0,
+    hits: 0,
+    attempts: 0,
+    startTime: Date.now(),
+    currentChallenge: null,
+    timerInterval: null,
+    timeLeft: 0,
+    nodes: generateNodes(mode)
+  };
+  
+  showScreen('screen-game');
+  renderMap();
+  updateStats();
+  
+  setTimeout(() => openChallenge(0), 800);
+}
+
+function restartGame() {
+  startGame(gameState.mode);
+}
+
+// ===== GERAR NÓS DO MAPA =====
+function generateNodes(mode) {
+  const nodes = [];
+  const icons = { equations: '📐', multiplication: '⏱️', logic: '🧩' };
+  const colors = ['#00f5a0', '#00d9f5', '#a78bfa', '#fbbf24', '#f472b6'];
+  
+  for (let i = 0; i < 10; i++) {
+    // Posição em zigue-zague
+    const row = Math.floor(i / 2);
+    const col = i % 2;
+    const x = 100 + (i * 85);
+    const y = 150 + (row % 2 === 0 ? 0 : 200) + (Math.random() * 40 - 20);
+    
+    nodes.push({
+      id: i,
+      x: Math.min(x, 900),
+      y: Math.max(80, Math.min(y, 420)),
+      completed: false,
+      icon: icons[mode],
+      color: colors[i % colors.length]
+    });
+  }
+  
+  // Ajustar posições em zigue-zague mais claro
+  nodes.forEach((n, i) => {
+    n.x = 80 + (i * 88);
+    n.y = i % 2 === 0 ? 150 : 350;
+  });
+  
+  return nodes;
+}
+
+// ===== RENDERIZAR MAPA =====
+function renderMap() {
+  const svg = document.getElementById('map-svg');
+  svg.innerHTML = '';
+  
+  // Desenhar caminhos
+  for (let i = 0; i < gameState.nodes.length - 1; i++) {
+    const n1 = gameState.nodes[i];
+    const n2 = gameState.nodes[i + 1];
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', n1.x);
+    line.setAttribute('y1', n1.y);
+    line.setAttribute('x2', n2.x);
+    line.setAttribute('y2', n2.y);
+    line.setAttribute('class', 'path-line' + (n1.completed ? ' active' : ''));
+    svg.appendChild(line);
+  }
+  
+  // Desenhar nós
+  gameState.nodes.forEach((node, i) => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('class', 'map-node');
+    g.style.cursor = i === gameState.currentLevel ? 'pointer' : 'default';
+    
+    // Círculo externo (glow)
+    const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    glow.setAttribute('cx', node.x);
+    glow.setAttribute('cy', node.y);
+    glow.setAttribute('r', 35);
+    glow.setAttribute('fill', 'none');
+    glow.setAttribute('stroke', node.color);
+    glow.setAttribute('stroke-width', 2);
+    glow.setAttribute('opacity', i === gameState.currentLevel ? 0.5 : 0.1);
+    if (i === gameState.currentLevel) {
+      const anim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+      anim.setAttribute('attributeName', 'r');
+      anim.setAttribute('values', '35;45;35');
+      anim.setAttribute('dur', '2s');
+      anim.setAttribute('repeatCount', 'indefinite');
+      glow.appendChild(anim);
+    }
+    g.appendChild(glow);
+    
+    // Círculo principal
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', node.x);
+    circle.setAttribute('cy', node.y);
+    circle.setAttribute('r', 28);
+    
+    if (node.completed) {
+      circle.setAttribute('fill', '#00f5a0');
+      circle.setAttribute('stroke', '#00f5a0');
+    } else if (i === gameState.currentLevel) {
+      circle.setAttribute('fill', node.color);
+      circle.setAttribute('stroke', '#fff');
+      circle.setAttribute('stroke-width', 3);
+    } else {
+      circle.setAttribute('fill', 'rgba(255,255,255,0.1)');
+      circle.setAttribute('stroke', 'rgba(255,255,255,0.3)');
+      circle.setAttribute('stroke-width', 2);
+    }
+    g.appendChild(circle);
+    
+    // Ícone ou número
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', node.x);
+    text.setAttribute('y', node.y + 6);
+    text.setAttribute('class', 'node-label');
+    text.setAttribute('font-size', '18');
+    text.textContent = node.completed ? '✓' : (i + 1);
+    g.appendChild(text);
+    
+    // Evento de clique apenas no nó atual
+    if (i === gameState.currentLevel) {
+      g.addEventListener('click', () => openChallenge(i));
+    }
+    
+    svg.appendChild(g);
+  });
+  
+  // Personagem no nó atual
+  if (gameState.currentLevel < gameState.nodes.length) {
+    const currentNode = gameState.nodes[gameState.currentLevel];
+    const char = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    char.setAttribute('x', currentNode.x);
+    char.setAttribute('y', currentNode.y - 45);
+    char.setAttribute('text-anchor', 'middle');
+    char.setAttribute('font-size', '32');
+    char.setAttribute('class', 'character');
+    char.textContent = '🧙';
+    svg.appendChild(char);
+  }
+}
+
+// ===== ATUALIZAR STATS =====
+function updateStats() {
+  document.getElementById('current-level').textContent = gameState.currentLevel + 1;
+  document.getElementById('score').textContent = gameState.score;
+  document.getElementById('hits').textContent = gameState.hits;
+}
+
+// ===== GERAR DESAFIOS =====
+function generateChallenge(level) {
+  const mode = gameState.mode;
+  
+  if (mode === 'equations') {
+    return generateEquation(level);
+  } else if (mode === 'multiplication') {
+    return generateMultiplication(level);
+  } else if (mode === 'logic') {
+    return generateLogic(level);
+  }
+}
+
+function generateEquation(level) {
+  const difficulty = Math.floor(level / 3);
+  let question, answer, hint;
+  
+  if (difficulty === 0) {
+    // x + a = b
+    const a = Math.floor(Math.random() * 20) + 1;
+    const x = Math.floor(Math.random() * 20) + 1;
+    const b = x + a;
+    question = `x + ${a} = ${b}`;
+    answer = x;
+    hint = 'Encontre o valor de x';
+  } else if (difficulty === 1) {
+    // ax = b
+    const a = Math.floor(Math.random() * 8) + 2;
+    const x = Math.floor(Math.random() * 10) + 1;
+    const b = a * x;
+    question = `${a}x = ${b}`;
+    answer = x;
+    hint = 'Divida ambos os lados por ' + a;
+  } else if (difficulty === 2) {
+    // ax + b = c
+    const a = Math.floor(Math.random() * 6) + 2;
+    const x = Math.floor(Math.random() * 10) + 1;
+    const b = Math.floor(Math.random() * 15) + 1;
+    const c = a * x + b;
+    question = `${a}x + ${b} = ${c}`;
+    answer = x;
+    hint = 'Isole o x: primeiro subtraia, depois divida';
+  } else {
+    // ax - b = c
+    const a = Math.floor(Math.random() * 7) + 3;
+    const x = Math.floor(Math.random() * 10) + 2;
+    const b = Math.floor(Math.random() * 10) + 1;
+    const c = a * x - b;
+    question = `${a}x - ${b} = ${c}`;
+    answer = x;
+    hint = 'Some ' + b + ' aos dois lados, depois divida por ' + a;
+  }
+  
+  return {
+    type: 'Equação',
+    question,
+    answer,
+    hint,
+    inputType: 'number'
+  };
+}
+
+function generateMultiplication(level) {
+  const max = Math.min(5 + level, 10);
+  const a = Math.floor(Math.random() * max) + 2;
+  const b = Math.floor(Math.random() * max) + 2;
+  
+  return {
+    type: 'Tabuada',
+    question: `${a} × ${b} = ?`,
+    answer: a * b,
+    hint: 'Responda antes do tempo acabar!',
+    inputType: 'options',
+    timeLimit: Math.max(8 - Math.floor(level / 3), 4),
+    options: generateOptions(a * b, max * max)
+  };
+}
+
+function generateLogic(level) {
+  const patterns = [
+    () => {
+      // Sequência aritmética
+      const start = Math.floor(Math.random() * 10) + 1;
+      const step = Math.floor(Math.random() * 5) + 2;
+      const seq = [start, start + step, start + 2*step, start + 3*step];
+      return {
+        question: `${seq[0]}, ${seq[1]}, ${seq[2]}, ${seq[3]}, ?`,
+        answer: start + 4*step,
+        hint: 'Descubra o padrão de crescimento'
+      };
+    },
+    () => {
+      // Sequência geométrica simples
+      const start = Math.floor(Math.random() * 3) + 2;
+      const ratio = Math.floor(Math.random() * 2) + 2;
+      const seq = [start, start*ratio, start*ratio*ratio];
+      return {
+        question: `${seq[0]}, ${seq[1]}, ${seq[2]}, ?`,
+        answer: start*ratio*ratio*ratio,
+        hint: 'Cada número é multiplicado por algo'
+      };
+    },
+    () => {
+      // Quadrados perfeitos
+      const start = Math.floor(Math.random() * 3) + 1;
+      const seq = [start*start, (start+1)*(start+1), (start+2)*(start+2)];
+      return {
+        question: `${seq[0]}, ${seq[1]}, ${seq[2]}, ?`,
+        answer: (start+3)*(start+3),
+        hint: 'Pense em números elevados ao quadrado'
+      };
+    },
+    () => {
+      // Fibonacci-like
+      const a = Math.floor(Math.random() * 3) + 1;
+      const b = Math.floor(Math.random() * 3) + 1;
+      const seq = [a, b, a+b, a+2*b];
+      return {
+        question: `${seq[0]}, ${seq[1]}, ${seq[2]}, ${seq[3]}, ?`,
+        answer: 2*a + 3*b,
+        hint: 'Cada número é a soma dos dois anteriores'
+      };
+    }
+  ];
+  
+  const pattern = patterns[level % patterns.length]();
+  
+  return {
+    type: 'Lógica',
+    question: pattern.question,
+    answer: pattern.answer,
+    hint: pattern.hint,
+    inputType: 'number'
+  };
+}
+
+function generateOptions(correct, max) {
+  const options = new Set([correct]);
+  while (options.size < 4) {
+    const variation = Math.floor(Math.random() * 10) - 5;
+    const opt = correct + variation;
+    if (opt > 0 && opt !== correct) options.add(opt);
+  }
+  return Array.from(options).sort(() => Math.random() - 0.5);
+}
+
+// ===== ABRIR DESAFIO =====
+function openChallenge(level) {
+  if (level !== gameState.currentLevel) return;
+  
+  clearInterval(gameState.timerInterval);
+  
+  const challenge = generateChallenge(level);
+  gameState.currentChallenge = challenge;
+  
+  document.getElementById('challenge-type').textContent = challenge.type;
+  document.getElementById('challenge-question').textContent = challenge.question;
+  document.getElementById('challenge-hint').textContent = challenge.hint || '';
+  document.getElementById('feedback').classList.remove('show');
+  
+  const answerArea = document.getElementById('answer-area');
+  const submitBtn = document.getElementById('btn-submit');
+  const timerContainer = document.getElementById('timer-container');
+  
+  answerArea.innerHTML = '';
+  
+  if (challenge.inputType === 'number') {
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.className = 'answer-input';
+    input.id = 'answer-input';
+    input.placeholder = 'Digite sua resposta';
+    input.autocomplete = 'off';
+    answerArea.appendChild(input);
+    submitBtn.style.display = 'block';
+    timerContainer.style.display = 'none';
+    
+    setTimeout(() => input.focus(), 300);
+    
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') submitAnswer();
+    });
+  } else if (challenge.inputType === 'options') {
+    const grid = document.createElement('div');
+    grid.className = 'options-grid';
+    challenge.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = opt;
+      btn.onclick = () => selectOption(btn, opt);
+      grid.appendChild(btn);
+    });
+    answerArea.appendChild(grid);
+    submitBtn.style.display = 'none';
+    timerContainer.style.display = 'block';
+    startTimer(challenge.timeLimit);
+  }
+  
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+let selectedOption = null;
+
+function selectOption(btn, value) {
+  if (btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
+  document.querySelectorAll('.option-btn').forEach(b => b.style.background = '');
+  btn.style.background = 'rgba(0,245,160,0.2)';
+  selectedOption = value;
+  clearInterval(gameState.timerInterval);
+  processAnswer(value);
+}
+
+// ===== TIMER =====
+function startTimer(seconds) {
+  gameState.timeLeft = seconds;
+  const totalTime = seconds;
+  const fill = document.getElementById('timer-fill');
+  const text = document.getElementById('timer-text');
+  
+  fill.style.width = '100%';
+  fill.classList.remove('warning', 'danger');
+  text.textContent = seconds + 's';
+  
+  gameState.timerInterval = setInterval(() => {
+    gameState.timeLeft -= 0.1;
+    const percent = (gameState.timeLeft / totalTime) * 100;
+    fill.style.width = percent + '%';
+    text.textContent = gameState.timeLeft.toFixed(1) + 's';
+    
+    if (percent < 30) {
+      fill.classList.add('danger');
+      fill.classList.remove('warning');
+    } else if (percent < 60) {
+      fill.classList.add('warning');
+    }
+    
+    if (gameState.timeLeft <= 0) {
+      clearInterval(gameState.timerInterval);
+      processAnswer(null, true);
+    }
+  }, 100);
+}
+
+// ===== SUBMETER RESPOSTA =====
+function submitAnswer() {
+  const input = document.getElementById('answer-input');
+  if (!input || input.value === '') return;
+  
+  const value = parseFloat(input.value);
+  processAnswer(value);
+}
+
+function processAnswer(value, timeout = false) {
+  const challenge = gameState.currentChallenge;
+  const correct = value === challenge.answer;
+  const feedback = document.getElementById('feedback');
+  
+  gameState.attempts++;
+  
+  if (correct) {
+    gameState.hits++;
+    const points = 100 + (gameState.mode === 'multiplication' ? Math.floor(gameState.timeLeft * 10) : 0);
+    gameState.score += points;
+    
+    feedback.textContent = `✅ Correto! +${points} pontos`;
+    feedback.className = 'feedback show success';
+    
+    createParticles();
+    
+    // Marcar nó como completo
+    gameState.nodes[gameState.currentLevel].completed = true;
+    gameState.currentLevel++;
+    updateStats();
+    
+    setTimeout(() => {
+      closeModal();
+      renderMap();
+      
+      if (gameState.currentLevel >= gameState.totalLevels) {
+        setTimeout(showFinalScreen, 500);
+      } else {
+        setTimeout(() => openChallenge(gameState.currentLevel), 800);
+      }
+    }, 1200);
+  } else {
+    feedback.textContent = timeout 
+      ? `⏰ Tempo esgotado! A resposta era ${challenge.answer}`
+      : `❌ Incorreto! A resposta era ${challenge.answer}. Tente novamente!`;
+    feedback.className = 'feedback show error';
+    
+    // Destacar opção errada
+    document.querySelectorAll('.option-btn').forEach(btn => {
+      if (parseInt(btn.textContent) === value) {
+        btn.classList.add('wrong');
+      }
+      if (parseInt(btn.textContent) === challenge.answer) {
+        btn.classList.add('correct');
+      }
+    });
+    
+    setTimeout(() => {
+      closeModal();
+      // Não avança, tenta novamente
+    }, 2000);
+  }
+}
+
+// ===== FECHAR MODAL =====
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+  clearInterval(gameState.timerInterval);
+  selectedOption = null;
+}
+
+// ===== PARTÍCULAS =====
+function createParticles() {
+  const emojis = ['⭐', '✨', '🎉', '💫', '🌟'];
+  for (let i = 0; i < 8; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    particle.style.left = (50 + Math.random() * 20 - 10) + '%';
+    particle.style.top = '50%';
+    particle.style.setProperty('--dx', (Math.random() * 200 - 100) + 'px');
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 1000);
+  }
+}
+
+// ===== TELA FINAL =====
+function showFinalScreen() {
+  const totalTime = Math.floor((Date.now() - gameState.startTime) / 1000);
+  const accuracy = gameState.attempts > 0 ? Math.round((gameState.hits / gameState.attempts) * 100) : 0;
+  
+  document.getElementById('final-score').textContent = gameState.score;
+  document.getElementById('final-hits').textContent = gameState.hits;
+  document.getElementById('final-accuracy').textContent = accuracy + '%';
+  document.getElementById('final-time').textContent = totalTime + 's';
+  
+  let message = '';
+  if (accuracy >= 90) message = '🌟 Excepcional! Você é um mestre da matemática!';
+  else if (accuracy >= 70) message = '🎉 Muito bem! Você dominou os desafios!';
+  else if (accuracy >= 50) message = '👍 Bom trabalho! Continue praticando!';
+  else message = '💪 Não desista! A prática leva à perfeição!';
+  
+  document.getElementById('final-message').textContent = message;
+  showScreen('screen-final');
+}
+
+// Fechar modal ao clicar fora
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-overlay') {
+    // Não fecha durante desafio ativo
+  }
+});
+</script>
+
+</body>
+</html>
+

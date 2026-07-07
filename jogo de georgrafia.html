@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CosmosGeo - Geografia & Astronomia</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/poppins@5.0.8/index.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+body {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #1a1a4e 0%, #0a0a2e 50%, #000010 100%);
+  color: #fff;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Estrelas de fundo */
+.stars {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+  animation: twinkle 3s infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.screen {
+  display: none;
+  min-height: 100vh;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+  animation: fadeIn 0.6s ease;
+}
+.screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== TELA INICIAL ===== */
+.logo-container {
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.logo-planet {
+  font-size: 5rem;
+  display: inline-block;
+  animation: orbit 8s linear infinite;
+  filter: drop-shadow(0 0 30px rgba(138,43,226,0.6));
+}
+
+@keyframes orbit {
+  0% { transform: rotate(0deg) translateX(10px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(10px) rotate(-360deg); }
+}
+
+.title {
+  font-size: clamp(2.2rem, 6vw, 3.8rem);
+  font-weight: 800;
+  background: linear-gradient(90deg, #ff6ec7, #8a2be2, #00d9ff, #ffd700);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  margin-bottom: 10px;
+  letter-spacing: -1px;
+  animation: gradientShift 5s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.subtitle {
+  font-size: 1.05rem;
+  color: #b8b8e8;
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 700px;
+  line-height: 1.6;
+}
+
+.modes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1100px;
+  width: 100%;
+}
+
+.mode-card {
+  background: linear-gradient(135deg, rgba(138,43,226,0.15), rgba(0,217,255,0.08));
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 24px;
+  padding: 30px 25px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  backdrop-filter: blur(15px);
+  position: relative;
+  overflow: hidden;
+}
+
+.mode-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.6s;
+}
+
+.mode-card:hover::before { left: 100%; }
+
+.mode-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  border-color: #8a2be2;
+  box-shadow: 0 20px 50px rgba(138,43,226,0.4);
+}
+
+.mode-icon {
+  font-size: 3.5rem;
+  margin-bottom: 15px;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.mode-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.mode-desc {
+  color: #b8b8e8;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+}
+
+.mode-tag {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 4px 12px;
+  background: rgba(138,43,226,0.25);
+  color: #d4a5ff;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== HEADER DO JOGO ===== */
+.game-header {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(15px);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.game-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.stat-icon { font-size: 1.2rem; }
+.stat-value { color: #00d9ff; font-weight: 700; }
+
+.btn-back {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.btn-back:hover { background: rgba(255,255,255,0.2); }
+
+/* ===== ÁREA DO JOGO ===== */
+.game-area {
+  width: 100%;
+  max-width: 1200px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  padding: 30px;
+  min-height: 500px;
+  backdrop-filter: blur(10px);
+}
+
+.game-instruction {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #b8b8e8;
+  margin-bottom: 25px;
+  font-weight: 500;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 25px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6ec7, #8a2be2, #00d9ff);
+  background-size: 200% 100%;
+  border-radius: 5px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(138,43,226,0.5);
+  animation: gradientShift 3s ease infinite;
+}
+
+/* ===== CAPITAIS ===== */
+.country-display {
+  text-align: center;
+  padding: 30px 20px;
+  background: linear-gradient(135deg, rgba(138,43,226,0.15), rgba(0,217,255,0.08));
+  border-radius: 20px;
+  margin-bottom: 25px;
+  border: 2px solid rgba(255,255,255,0.1);
+}
+
+.country-flag {
+  font-size: 6rem;
+  display: inline-block;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+  animation: dropIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes dropIn {
+  0% { transform: translateY(-50px) scale(0.5); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.country-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.country-continent {
+  font-size: 0.95rem;
+  color: #b8b8e8;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.option-btn {
+  background: rgba(255,255,255,0.06);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 18px 15px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+}
+
+.option-btn:hover {
+  background: rgba(138,43,226,0.2);
+  border-color: #8a2be2;
+  transform: translateY(-3px);
+}
+
+.option-btn.correct {
+  background: rgba(0,255,150,0.3);
+  border-color: #00ff96;
+  animation: correctPulse 0.5s;
+}
+
+.option-btn.wrong {
+  background: rgba(255,68,68,0.3);
+  border-color: #ff4444;
+  animation: shake 0.4s;
+}
+
+@keyframes correctPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+/* ===== BANDEIRAS NO MAPA ===== */
+.map-container {
+  position: relative;
+  background: linear-gradient(135deg, #0a2540, #1a3a5c);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.1);
+  margin-bottom: 20px;
+}
+
+.world-map {
+  width: 100%;
+  height: 400px;
+  display: block;
+}
+
+.flag-challenge {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(138,43,226,0.15), rgba(0,217,255,0.08));
+  border-radius: 15px;
+  margin-bottom: 20px;
+}
+
+.flag-display {
+  font-size: 5rem;
+  display: inline-block;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4));
+  animation: dropIn 0.5s;
+}
+
+.flag-question {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.map-marker {
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.map-marker:hover circle {
+  r: 12;
+  fill: #ffd700;
+}
+
+.map-marker.correct circle {
+  fill: #00ff96;
+  filter: drop-shadow(0 0 10px #00ff96);
+}
+
+.map-marker.wrong circle {
+  fill: #ff4444;
+  filter: drop-shadow(0 0 10px #ff4444);
+}
+
+/* ===== SISTEMA SOLAR ===== */
+.solar-system {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  background: radial-gradient(circle at center, #1a0a2e 0%, #000010 100%);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.1);
+  margin-bottom: 20px;
+}
+
+.sun {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, #fff700, #ff8c00);
+  border-radius: 50%;
+  box-shadow: 0 0 40px #ffd700, 0 0 80px #ff8c00;
+  z-index: 5;
+  animation: sunPulse 3s ease-in-out infinite;
+}
+
+@keyframes sunPulse {
+  0%, 100% { box-shadow: 0 0 40px #ffd700, 0 0 80px #ff8c00; }
+  50% { box-shadow: 0 0 60px #ffd700, 0 0 120px #ff8c00; }
+}
+
+.orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border: 1px dashed rgba(255,255,255,0.15);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.planet {
+  position: absolute;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 5px rgba(0,0,0,0.8);
+}
+
+.planet:hover {
+  transform: scale(1.3);
+  z-index: 10;
+}
+
+.planet.correct {
+  box-shadow: 0 0 30px #00ff96;
+  animation: planetGlow 1s;
+}
+
+.planet.wrong {
+  animation: shake 0.4s;
+}
+
+@keyframes planetGlow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+}
+
+.planet-info {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(138,43,226,0.15), rgba(0,217,255,0.08));
+  border-radius: 15px;
+  margin-bottom: 20px;
+}
+
+.planet-question {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.planet-hint {
+  font-size: 0.9rem;
+  color: #b8b8e8;
+}
+
+/* ===== FEEDBACK ===== */
+.feedback {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  padding: 15px 30px;
+  border-radius: 15px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  z-index: 1000;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feedback.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.feedback.success {
+  background: linear-gradient(135deg, #00ff96, #00d9ff);
+  color: #0a0a2e;
+}
+
+.feedback.error {
+  background: linear-gradient(135deg, #ff6b6b, #ff4444);
+  color: #fff;
+}
+
+/* ===== TELA FINAL ===== */
+.trophy-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  animation: floatTrophy 3s ease-in-out infinite;
+}
+
+@keyframes floatTrophy {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-15px) rotate(5deg); }
+}
+
+.final-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  max-width: 700px;
+  width: 100%;
+  margin: 30px 0;
+}
+
+.final-stat {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 18px;
+  padding: 20px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.final-stat-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #ff6ec7, #8a2be2, #00d9ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 5px;
+}
+
+.final-stat-label {
+  font-size: 0.85rem;
+  color: #b8b8e8;
+}
+
+.btn-primary {
+  padding: 14px 35px;
+  background: linear-gradient(135deg, #ff6ec7, #8a2be2);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin: 5px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(138,43,226,0.5);
+}
+
+/* ===== PARTÍCULAS ===== */
+.particle {
+  position: fixed;
+  pointer-events: none;
+  font-size: 1.8rem;
+  z-index: 200;
+  animation: particleFloat 1.2s ease-out forwards;
+}
+
+@keyframes particleFloat {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--dx), -150px) scale(0.3) rotate(360deg); opacity: 0; }
+}
+
+@media (max-width: 600px) {
+  .game-header { flex-direction: column; text-align: center; }
+  .stats-row { justify-content: center; }
+  .game-area { padding: 20px 15px; }
+  .country-flag, .flag-display { font-size: 4rem; }
+  .solar-system { height: 400px; }
+}
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<!-- TELA INICIAL -->
+<div class="screen active" id="screen-home">
+  <div class="logo-container">
+    <span class="logo-planet">🪐</span>
+  </div>
+  <h1 class="title">CosmosGeo</h1>
+  <p class="subtitle">Explore o mundo e o universo! Descubra capitais, identifique bandeiras e navegue pelo Sistema Solar em uma jornada intergaláctica de conhecimento.</p>
+  
+  <div class="modes-grid">
+    <div class="mode-card" onclick="startGame('capitals')">
+      <span class="mode-icon">🏛️</span>
+      <h3 class="mode-title">Capitais do Mundo</h3>
+      <p class="mode-desc">Descubra a capital de cada país e viaje mentalmente pelos cinco continentes.</p>
+      <span class="mode-tag">🌎 Geografia</span>
+    </div>
+    <div class="mode-card" onclick="startGame('flags')">
+      <span class="mode-icon">🚩</span>
+      <h3 class="mode-title">Bandeiras no Mapa</h3>
+      <p class="mode-desc">Identifique a bandeira e localize o país no mapa-múndi interativo.</p>
+      <span class="mode-tag">🗺️ Cartografia</span>
+    </div>
+    <div class="mode-card" onclick="startGame('solar')">
+      <span class="mode-icon">🚀</span>
+      <h3 class="mode-title">Sistema Solar</h3>
+      <p class="mode-desc">Navegue pelas órbitas planetárias e descubra os mistérios do nosso sistema.</p>
+      <span class="mode-tag">⭐ Astronomia</span>
+    </div>
+  </div>
+</div>
+
+<!-- TELA DO JOGO -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <button class="btn-back" onclick="goHome()">← Menu</button>
+    <div class="game-title" id="game-title">🎮 Modo de Jogo</div>
+    <div class="stats-row">
+      <div class="stat">
+        <span class="stat-icon">🎯</span>
+        <span><span class="stat-value" id="current-level">1</span>/10</span>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">⭐</span>
+        <span class="stat-value" id="score">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">✅</span>
+        <span class="stat-value" id="hits">0</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="game-area">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+    </div>
+    <div id="game-content"></div>
+  </div>
+</div>
+
+<!-- TELA FINAL -->
+<div class="screen" id="screen-final">
+  <div class="trophy-icon">🏆</div>
+  <h1 class="title">Exploração Completa!</h1>
+  <p class="subtitle" id="final-message">Parabéns! Você concluiu todos os desafios.</p>
+  
+  <div class="final-stats">
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-score">0</div>
+      <div class="final-stat-label">Pontos</div>
+    </div>
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-hits">0</div>
+      <div class="final-stat-label">Acertos</div>
+    </div>
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-accuracy">0%</div>
+      <div class="final-stat-label">Precisão</div>
+    </div>
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-time">0s</div>
+      <div class="final-stat-label">Tempo</div>
+    </div>
+  </div>
+  
+  <div>
+    <button class="btn-primary" onclick="goHome()">🏠 Menu Principal</button>
+    <button class="btn-primary" onclick="restartGame()">🔄 Jogar Novamente</button>
+  </div>
+</div>
+
+<!-- FEEDBACK FLUTUANTE -->
+<div class="feedback" id="feedback"></div>
+
+<script>
+// ===== DADOS =====
+const COUNTRIES = [
+  { name: 'Brasil', flag: '🇧🇷', capital: 'Brasília', continent: 'América do Sul' },
+  { name: 'França', flag: '🇫🇷', capital: 'Paris', continent: 'Europa' },
+  { name: 'Japão', flag: '🇯🇵', capital: 'Tóquio', continent: 'Ásia' },
+  { name: 'Egito', flag: '🇪🇬', capital: 'Cairo', continent: 'África' },
+  { name: 'Austrália', flag: '🇦🇺', capital: 'Canberra', continent: 'Oceania' },
+  { name: 'Canadá', flag: '🇨🇦', capital: 'Ottawa', continent: 'América do Norte' },
+  { name: 'Argentina', flag: '🇦🇷', capital: 'Buenos Aires', continent: 'América do Sul' },
+  { name: 'Alemanha', flag: '🇩🇪', capital: 'Berlim', continent: 'Europa' },
+  { name: 'Itália', flag: '🇮🇹', capital: 'Roma', continent: 'Europa' },
+  { name: 'México', flag: '🇲🇽', capital: 'Cidade do México', continent: 'América do Norte' },
+  { name: 'China', flag: '🇨🇳', capital: 'Pequim', continent: 'Ásia' },
+  { name: 'Índia', flag: '🇮🇳', capital: 'Nova Délhi', continent: 'Ásia' },
+  { name: 'Rússia', flag: '🇷🇺', capital: 'Moscou', continent: 'Europa/Ásia' },
+  { name: 'Portugal', flag: '🇵🇹', capital: 'Lisboa', continent: 'Europa' },
+  { name: 'Espanha', flag: '🇪🇸', capital: 'Madri', continent: 'Europa' },
+  { name: 'Reino Unido', flag: '🇬🇧', capital: 'Londres', continent: 'Europa' },
+  { name: 'Estados Unidos', flag: '🇺🇸', capital: 'Washington', continent: 'América do Norte' },
+  { name: 'África do Sul', flag: '🇿🇦', capital: 'Pretória', continent: 'África' },
+  { name: 'Colômbia', flag: '🇨🇴', capital: 'Bogotá', continent: 'América do Sul' },
+  { name: 'Peru', flag: '🇵🇪', capital: 'Lima', continent: 'América do Sul' },
+  { name: 'Chile', flag: '🇨🇱', capital: 'Santiago', continent: 'América do Sul' },
+  { name: 'Grécia', flag: '🇬🇷', capital: 'Atenas', continent: 'Europa' },
+  { name: 'Turquia', flag: '🇹🇷', capital: 'Ancara', continent: 'Europa/Ásia' },
+  { name: 'Tailândia', flag: '🇹🇭', capital: 'Bangkok', continent: 'Ásia' },
+  { name: 'Noruega', flag: '🇳🇴', capital: 'Oslo', continent: 'Europa' }
+];
+
+const MAP_LOCATIONS = [
+  { name: 'Brasil', x: 30, y: 65, flag: '🇧🇷' },
+  { name: 'Estados Unidos', x: 20, y: 35, flag: '🇺🇸' },
+  { name: 'França', x: 48, y: 30, flag: '🇫🇷' },
+  { name: 'Japão', x: 85, y: 35, flag: '🇯🇵' },
+  { name: 'Egito', x: 55, y: 45, flag: '🇪🇬' },
+  { name: 'Austrália', x: 85, y: 70, flag: '🇦🇺' },
+  { name: 'Rússia', x: 70, y: 20, flag: '🇷🇺' },
+  { name: 'Índia', x: 72, y: 45, flag: '🇮🇳' },
+  { name: 'África do Sul', x: 55, y: 75, flag: '🇿🇦' },
+  { name: 'Argentina', x: 28, y: 80, flag: '🇦🇷' },
+  { name: 'México', x: 18, y: 45, flag: '🇲🇽' },
+  { name: 'China', x: 78, y: 38, flag: '🇨🇳' },
+  { name: 'Canadá', x: 20, y: 22, flag: '🇨🇦' },
+  { name: 'Alemanha', x: 50, y: 28, flag: '🇩🇪' },
+  { name: 'Itália', x: 51, y: 35, flag: '🇮🇹' }
+];
+
+const PLANETS = [
+  { name: 'Mercúrio', emoji: '☿️', color: '#a0a0a0', size: 20, orbit: 60, fact: 'O menor planeta do Sistema Solar' },
+  { name: 'Vênus', emoji: '♀', color: '#e8b87d', size: 26, orbit: 90, fact: 'O planeta mais quente' },
+  { name: 'Terra', emoji: '🌍', color: '#4a90e2', size: 28, orbit: 120, fact: 'Nosso lar, o planeta azul' },
+  { name: 'Marte', emoji: '♂', color: '#d9534f', size: 24, orbit: 150, fact: 'O planeta vermelho' },
+  { name: 'Júpiter', emoji: '♃', color: '#d4a574', size: 42, orbit: 190, fact: 'O maior planeta do Sistema Solar' },
+  { name: 'Saturno', emoji: '🪐', color: '#e8d4a0', size: 38, orbit: 230, fact: 'Famoso por seus anéis' },
+  { name: 'Urano', emoji: '♅', color: '#7dd3c0', size: 32, orbit: 265, fact: 'Gira "deitado" em seu eixo' },
+  { name: 'Netuno', emoji: '♆', color: '#4169e1', size: 30, orbit: 295, fact: 'O planeta mais distante do Sol' }
+];
+
+const PLANET_QUESTIONS = [
+  { q: 'Qual é o maior planeta do Sistema Solar?', answer: 'Júpiter', hint: 'Um gigante gasoso' },
+  { q: 'Qual planeta é conhecido como "planeta vermelho"?', answer: 'Marte', hint: 'Tem cor avermelhada' },
+  { q: 'Qual planeta possui anéis mais visíveis?', answer: 'Saturno', hint: 'Gigante gasoso com anéis' },
+  { q: 'Qual é o planeta mais próximo do Sol?', answer: 'Mercúrio', hint: 'O menor de todos' },
+  { q: 'Em qual planeta vivemos?', answer: 'Terra', hint: 'O planeta azul' },
+  { q: 'Qual é o planeta mais quente?', answer: 'Vênus', hint: 'Segundo a partir do Sol' },
+  { q: 'Qual planeta gira "deitado"?', answer: 'Urano', hint: 'Gigante de gelo' },
+  { q: 'Qual é o planeta mais distante do Sol?', answer: 'Netuno', hint: 'Azul e gelado' },
+  { q: 'Qual planeta tem a Grande Mancha Vermelha?', answer: 'Júpiter', hint: 'O maior de todos' },
+  { q: 'Qual planeta tem condições para a vida como conhecemos?', answer: 'Terra', hint: 'Nosso lar' }
+];
+
+// ===== ESTADO =====
+let game = {
+  mode: null,
+  level: 0,
+  total: 10,
+  score: 0,
+  hits: 0,
+  attempts: 0,
+  startTime: null,
+  items: [],
+  locked: false
+};
+
+// ===== ESTRELAS DE FUNDO =====
+function createStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 100; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 3 + 1;
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.animationDelay = Math.random() * 3 + 's';
+    star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    container.appendChild(star);
+  }
+}
+createStars();
+
+// ===== NAVEGAÇÃO =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  showScreen('screen-home');
+}
+
+// ===== INICIAR JOGO =====
+function startGame(mode) {
+  game = {
+    mode,
+    level: 0,
+    total: 10,
+    score: 0,
+    hits: 0,
+    attempts: 0,
+    startTime: Date.now(),
+    items: shuffle(getItemsForMode(mode)).slice(0, 10),
+    locked: false
+  };
+  
+  const titles = {
+    capitals: '🏛️ Capitais do Mundo',
+    flags: '🚩 Bandeiras no Mapa',
+    solar: '🚀 Sistema Solar'
+  };
+  document.getElementById('game-title').textContent = titles[mode];
+  
+  showScreen('screen-game');
+  updateUI();
+  renderLevel();
+}
+
+function restartGame() {
+  startGame(game.mode);
+}
+
+function getItemsForMode(mode) {
+  if (mode === 'capitals') return [...COUNTRIES];
+  if (mode === 'flags') return [...MAP_LOCATIONS];
+  if (mode === 'solar') return [...PLANET_QUESTIONS];
+  return [];
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ===== UI =====
+function updateUI() {
+  document.getElementById('current-level').textContent = game.level + 1;
+  document.getElementById('score').textContent = game.score;
+  document.getElementById('hits').textContent = game.hits;
+  document.getElementById('progress-fill').style.width = (game.level / game.total * 100) + '%';
+}
+
+// ===== RENDERIZAR NÍVEL =====
+function renderLevel() {
+  if (game.level >= game.total) {
+    showFinal();
+    return;
+  }
+  
+  const item = game.items[game.level];
+  const content = document.getElementById('game-content');
+  
+  if (game.mode === 'capitals') renderCapitals(item, content);
+  else if (game.mode === 'flags') renderFlags(item, content);
+  else if (game.mode === 'solar') renderSolar(item, content);
+}
+
+// ===== CAPITAIS =====
+function renderCapitals(country, content) {
+  const wrongOptions = shuffle(COUNTRIES.filter(c => c.capital !== country.capital))
+    .slice(0, 3)
+    .map(c => c.capital);
+  const options = shuffle([country.capital, ...wrongOptions]);
+  
+  content.innerHTML = `
+    <div class="game-instruction">🏛️ Qual é a capital deste país?</div>
+    <div class="country-display">
+      <div class="country-flag">${country.flag}</div>
+      <div class="country-name">${country.name}</div>
+      <div class="country-continent">📍 ${country.continent}</div>
+    </div>
+    <div class="options-grid">
+      ${options.map(opt => `
+        <button class="option-btn" onclick="selectCapital(this, '${opt.replace(/'/g, "\\'")}')">${opt}</button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function selectCapital(btn, answer) {
+  if (game.locked) return;
+  game.locked = true;
+  
+  const country = game.items[game.level];
+  const correct = answer === country.capital;
+  
+  game.attempts++;
+  
+  if (correct) {
+    game.hits++;
+    game.score += 100;
+    btn.classList.add('correct');
+    showFeedback('success', `✅ Correto! +100 pontos`);
+    createParticles();
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(b => {
+      if (b.textContent === country.capital) b.classList.add('correct');
+    });
+    showFeedback('error', `❌ A capital é ${country.capital}`);
+  }
+  
+  updateUI();
+  setTimeout(() => {
+    game.level++;
+    game.locked = false;
+    updateUI();
+    renderLevel();
+  }, 1800);
+}
+
+// ===== BANDEIRAS =====
+function renderFlags(location, content) {
+  content.innerHTML = `
+    <div class="game-instruction">🗺️ Clique no local correto do mapa onde fica este país!</div>
+    <div class="flag-challenge">
+      <div class="flag-display">${location.flag}</div>
+      <div class="flag-question">Onde fica este país?</div>
+    </div>
+    <div class="map-container">
+      <svg class="world-map" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+        <!-- Fundo do oceano -->
+        <rect width="100" height="100" fill="#0a2540"/>
+        
+        <!-- Continentes simplificados -->
+        <!-- América do Norte -->
+        <path d="M 10,20 Q 15,15 25,18 L 30,25 L 28,40 L 22,45 L 15,42 L 10,35 Z" fill="#2d5a3d" stroke="#4a8a5d" stroke-width="0.3"/>
+        <!-- América do Sul -->
+        <path d="M 22,50 Q 28,48 32,55 L 33,70 L 30,82 L 25,85 L 22,75 L 20,60 Z" fill="#2d5a3d" stroke="#4a8a5d" stroke-width="0.3"/>
+        <!-- Europa -->
+        <path d="M 45,22 Q 55,20 58,28 L 55,35 L 48,34 L 45,28 Z" fill="#2d5a3d" stroke="#4a8a5d" stroke-width="0.3"/>
+        <!-- África -->
+        <path d="M 48,40 Q 58,38 60,50 L 58,70 L 52,78 L 48,70 L 46,55 Z" fill="#2d5a3d" stroke="#4a8a5d" stroke-width="0.3"/>
+        <!-- Ásia -->
+        <path d="M 58,18 Q 75,15 88,25 L 90,40 L 82,48 L 70,45 L 62,35 Z" fill="#2d5a3d" stroke="#4a8a5d" stroke-width="0.3"/>
+        <!-- Oceania -->
+        <path d="M 78,62 Q 90,60 92,70 L 88,75 L 80,73 Z" fill="#2d5a3d" stroke="#4a8a5d" stroke-width="0.3"/>
+        
+        <!-- Linhas de grade -->
+        <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.05)" stroke-width="0.2"/>
+        <line x1="50" y1="0" x2="50" y2="100" stroke="rgba(255,255,255,0.05)" stroke-width="0.2"/>
+        
+        <!-- Marcadores clicáveis -->
+        ${MAP_LOCATIONS.map((loc, i) => `
+          <g class="map-marker" data-country="${loc.name}" onclick="selectMapLocation('${loc.name}')">
+            <circle cx="${loc.x}" cy="${loc.y}" r="2.5" fill="#ff6ec7" stroke="#fff" stroke-width="0.5"/>
+            <circle cx="${loc.x}" cy="${loc.y}" r="4" fill="none" stroke="#ff6ec7" stroke-width="0.3" opacity="0.5">
+              <animate attributeName="r" values="4;7;4" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.5;0;0.5" dur="2s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+        `).join('')}
+      </svg>
+    </div>
+  `;
+}
+
+function selectMapLocation(countryName) {
+  if (game.locked) return;
+  game.locked = true;
+  
+  const location = game.items[game.level];
+  const correct = countryName === location.name;
+  const marker = document.querySelector(`[data-country="${countryName}"]`);
+  
+  game.attempts++;
+  
+  if (correct) {
+    game.hits++;
+    game.score += 120;
+    marker.classList.add('correct');
+    showFeedback('success', `✅ Correto! +120 pontos`);
+    createParticles();
+  } else {
+    marker.classList.add('wrong');
+    const correctMarker = document.querySelector(`[data-country="${location.name}"]`);
+    setTimeout(() => correctMarker.classList.add('correct'), 400);
+    showFeedback('error', `❌ Era em ${location.name}`);
+  }
+  
+  updateUI();
+  setTimeout(() => {
+    game.level++;
+    game.locked = false;
+    updateUI();
+    renderLevel();
+  }, 1800);
+}
+
+// ===== SISTEMA SOLAR =====
+function renderSolar(question, content) {
+  content.innerHTML = `
+    <div class="planet-info">
+      <div class="planet-question">🚀 ${question.q}</div>
+      <div class="planet-hint">💡 ${question.hint}</div>
+    </div>
+    <div class="solar-system" id="solar-system">
+      <div class="sun"></div>
+      ${PLANETS.map((planet, i) => `
+        <div class="orbit" style="width: ${planet.orbit * 2}px; height: ${planet.orbit * 2}px;"></div>
+        <div class="planet" 
+             data-planet="${planet.name}" 
+             onclick="selectPlanet('${planet.name}')"
+             style="
+               left: calc(50% + ${planet.orbit}px - ${planet.size/2}px);
+               top: calc(50% - ${planet.size/2}px);
+               width: ${planet.size}px;
+               height: ${planet.size}px;
+               background: radial-gradient(circle at 30% 30%, ${planet.color}, ${shadeColor(planet.color, -30)});
+               box-shadow: 0 0 15px ${planet.color}80;
+             "
+             title="${planet.name}">
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function shadeColor(color, percent) {
+  const num = parseInt(color.replace('#',''), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = (num >> 16) + amt;
+  const G = (num >> 8 & 0x00FF) + amt;
+  const B = (num & 0x0000FF) + amt;
+  return '#' + (0x1000000 + (Math.max(Math.min(R,255),0)*0x10000) + (Math.max(Math.min(G,255),0)*0x100) + Math.max(Math.min(B,255),0)).toString(16).slice(1);
+}
+
+function selectPlanet(planetName) {
+  if (game.locked) return;
+  game.locked = true;
+  
+  const question = game.items[game.level];
+  const correct = planetName === question.answer;
+  const planetEl = document.querySelector(`[data-planet="${planetName}"]`);
+  
+  game.attempts++;
+  
+  if (correct) {
+    game.hits++;
+    game.score += 150;
+    planetEl.classList.add('correct');
+    showFeedback('success', `✅ Correto! +150 pontos`);
+    createParticles();
+  } else {
+    planetEl.classList.add('wrong');
+    const correctPlanet = document.querySelector(`[data-planet="${question.answer}"]`);
+    setTimeout(() => correctPlanet.classList.add('correct'), 400);
+    showFeedback('error', `❌ Era ${question.answer}`);
+  }
+  
+  updateUI();
+  setTimeout(() => {
+    game.level++;
+    game.locked = false;
+    updateUI();
+    renderLevel();
+  }, 1800);
+}
+
+// ===== FEEDBACK =====
+function showFeedback(type, message) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback ' + type;
+  fb.innerHTML = message;
+  fb.classList.add('show');
+  setTimeout(() => fb.classList.remove('show'), 1600);
+}
+
+// ===== PARTÍCULAS =====
+function createParticles() {
+  const emojis = ['⭐', '✨', '🌟', '🚀', '🪐', '💫'];
+  for (let i = 0; i < 10; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    p.style.left = (40 + Math.random() * 20) + '%';
+    p.style.top = '50%';
+    p.style.setProperty('--dx', (Math.random() * 300 - 150) + 'px');
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1200);
+  }
+}
+
+// ===== TELA FINAL =====
+function showFinal() {
+  const totalTime = Math.floor((Date.now() - game.startTime) / 1000);
+  const accuracy = game.attempts > 0 ? Math.round((game.hits / game.attempts) * 100) : 0;
+  
+  document.getElementById('final-score').textContent = game.score;
+  document.getElementById('final-hits').textContent = game.hits + '/' + game.total;
+  document.getElementById('final-accuracy').textContent = accuracy + '%';
+  document.getElementById('final-time').textContent = totalTime + 's';
+  
+  let msg = '';
+  if (accuracy >= 90) msg = '🌟 Excepcional! Você é um verdadeiro explorador do cosmos!';
+  else if (accuracy >= 70) msg = '🚀 Muito bem! Sua jornada pelo conhecimento foi incrível!';
+  else if (accuracy >= 50) msg = '🌍 Bom trabalho! Continue explorando o mundo e o universo!';
+  else msg = '💫 Continue praticando! O universo tem muito a nos ensinar!';
+  
+  document.getElementById('final-message').textContent = msg;
+  showScreen('screen-final');
+}
+</script>
+
+</body>
+</html>
+

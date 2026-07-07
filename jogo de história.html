@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crônicas do Tempo - Narrativas Históricas</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cinzel@5.0.8/index.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/crimson-text@5.0.8/index.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  min-height: 100vh;
+  font-family: 'Crimson Text', serif;
+  color: #f5e6d3;
+  overflow-x: hidden;
+  transition: background 0.8s ease;
+}
+
+body.theme-egypt {
+  background: radial-gradient(ellipse at top, #5a3a1a 0%, #3d2817 40%, #1a0f08 100%);
+}
+body.theme-maya {
+  background: radial-gradient(ellipse at top, #2d5a3d 0%, #1a3a2a 40%, #0a1a10 100%);
+}
+body.theme-medieval {
+  background: radial-gradient(ellipse at top, #4a2a2a 0%, #2a1a1a 40%, #0a0505 100%);
+}
+body.theme-default {
+  background: radial-gradient(ellipse at top, #2a1f3d 0%, #1a1028 40%, #05030a 100%);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.01) 2px, rgba(255,255,255,0.01) 4px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.screen {
+  display: none;
+  min-height: 100vh;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+  animation: fadeIn 0.8s ease;
+}
+.screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-15px) rotate(3deg); }
+}
+
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.logo-icon {
+  font-size: 4.5rem;
+  display: inline-block;
+  animation: float 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 25px rgba(201,169,97,0.5));
+}
+
+.title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2rem, 6vw, 3.8rem);
+  font-weight: 900;
+  background: linear-gradient(90deg, #c9a961, #ffd700, #c9a961);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+  animation: shimmer 4s ease infinite;
+}
+
+.subtitle {
+  font-size: 1.15rem;
+  color: #d4c5a9;
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 700px;
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.periods-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 22px;
+  max-width: 1100px;
+  width: 100%;
+}
+
+.period-card {
+  background: rgba(0,0,0,0.4);
+  border: 2px solid rgba(201,169,97,0.3);
+  border-radius: 8px;
+  padding: 30px 25px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.period-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: var(--card-accent, #c9a961);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s;
+}
+
+.period-card:hover::before { transform: scaleX(1); }
+
+.period-card.egypt { --card-accent: #ffd700; }
+.period-card.maya { --card-accent: #5fb89a; }
+.period-card.medieval { --card-accent: #c9464d; }
+
+.period-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--card-accent);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 30px var(--card-accent);
+}
+
+.period-icon {
+  font-size: 3.5rem;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.period-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--card-accent);
+  letter-spacing: 1px;
+}
+
+.period-era {
+  font-size: 0.85rem;
+  color: #a89878;
+  margin-bottom: 12px;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+.period-desc {
+  color: #d4c5a9;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.period-role {
+  display: inline-block;
+  padding: 5px 14px;
+  background: rgba(201,169,97,0.15);
+  border: 1px solid rgba(201,169,97,0.3);
+  color: #c9a961;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.game-header {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(201,169,97,0.3);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.game-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #c9a961;
+  letter-spacing: 1px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.stat-icon { font-size: 1.1rem; }
+.stat-value { color: #ffd700; font-weight: 700; }
+
+.btn-back {
+  background: rgba(201,169,97,0.15);
+  border: 1px solid rgba(201,169,97,0.4);
+  color: #d4c5a9;
+  padding: 7px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+.btn-back:hover { 
+  background: rgba(201,169,97,0.3); 
+  color: #ffd700;
+}
+
+.narrative-area {
+  width: 100%;
+  max-width: 900px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(201,169,97,0.3);
+  border-radius: 8px;
+  padding: 40px;
+  backdrop-filter: blur(10px);
+  position: relative;
+  min-height: 400px;
+}
+
+.narrative-area::before,
+.narrative-area::after {
+  content: '❧';
+  position: absolute;
+  color: #c9a961;
+  font-size: 1.5rem;
+  opacity: 0.5;
+}
+.narrative-area::before { top: 10px; left: 15px; }
+.narrative-area::after { bottom: 10px; right: 15px; transform: rotate(180deg); }
+
+.scene-header {
+  text-align: center;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(201,169,97,0.2);
+}
+
+.scene-chapter {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  color: #a89878;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.scene-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 2px;
+}
+
+.scene-illustration {
+  text-align: center;
+  font-size: 4rem;
+  margin: 20px 0;
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+  animation: slideUp 0.8s ease;
+}
+
+.narrative-text {
+  font-size: 1.15rem;
+  line-height: 1.9;
+  color: #e8dcc0;
+  margin-bottom: 30px;
+  text-align: justify;
+  text-indent: 2em;
+}
+
+.narrative-text p {
+  margin-bottom: 15px;
+}
+
+.narrative-text .highlight {
+  color: #ffd700;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.quiz-prompt {
+  background: rgba(201,169,97,0.1);
+  border-left: 3px solid #c9a961;
+  padding: 15px 20px;
+  margin: 20px 0;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: #ffd700;
+}
+
+.choices-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.choice-btn {
+  background: rgba(201,169,97,0.08);
+  border: 1px solid rgba(201,169,97,0.3);
+  border-radius: 6px;
+  padding: 16px 20px;
+  color: #e8dcc0;
+  font-family: 'Crimson Text', serif;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.choice-btn::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0;
+  width: 0; height: 100%;
+  background: linear-gradient(90deg, rgba(201,169,97,0.2), transparent);
+  transition: width 0.4s;
+}
+
+.choice-btn:hover::before { width: 100%; }
+
+.choice-btn:hover {
+  border-color: #c9a961;
+  transform: translateX(5px);
+  color: #ffd700;
+}
+
+.choice-letter {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  color: #c9a961;
+  font-size: 1.2rem;
+  min-width: 25px;
+  position: relative;
+  z-index: 1;
+}
+
+.choice-text {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
+
+.choice-btn.correct {
+  background: rgba(95,184,154,0.25);
+  border-color: #5fb89a;
+  color: #5fb89a;
+  animation: correctPulse 0.5s;
+}
+
+.choice-btn.wrong {
+  background: rgba(201,70,77,0.25);
+  border-color: #c9464d;
+  color: #c9464d;
+  animation: shake 0.4s;
+}
+
+.choice-btn.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@keyframes correctPulse {
+  0%, 100% { transform: translateX(5px) scale(1); }
+  50% { transform: translateX(5px) scale(1.02); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.choice-feedback {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
+  border-left: 3px solid #c9a961;
+  animation: slideUp 0.5s ease;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #e8dcc0;
+  font-style: italic;
+}
+
+.choice-feedback.positive { border-left-color: #5fb89a; }
+.choice-feedback.negative { border-left-color: #c9464d; }
+
+.btn-continue {
+  margin-top: 25px;
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #c9a961, #8b6f3a);
+  border: none;
+  border-radius: 6px;
+  color: #1a0f08;
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.btn-continue:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(201,169,97,0.4);
+}
+
+.feedback {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  z-index: 1000;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  letter-spacing: 1px;
+}
+
+.feedback.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.feedback.success {
+  background: linear-gradient(135deg, #5fb89a, #3d8a6a);
+  color: #fff;
+}
+
+.feedback.error {
+  background: linear-gradient(135deg, #c9464d, #8b2635);
+  color: #fff;
+}
+
+.trophy-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.final-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 900;
+  background: linear-gradient(90deg, #c9a961, #ffd700, #c9a961);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+}
+
+.final-message {
+  font-size: 1.15rem;
+  color: #d4c5a9;
+  text-align: center;
+  margin-bottom: 30px;
+  max-width: 700px;
+  line-height: 1.8;
+  font-style: italic;
+}
+
+.final-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  max-width: 700px;
+  width: 100%;
+  margin: 20px 0 30px;
+}
+
+.final-stat {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(201,169,97,0.3);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+}
+
+.final-stat-value {
+  font-family: 'Cinzel', serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffd700;
+  margin-bottom: 5px;
+  letter-spacing: 1px;
+}
+
+.final-stat-label {
+  font-size: 0.85rem;
+  color: #a89878;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.final-rank {
+  background: rgba(201,169,97,0.1);
+  border: 2px solid #c9a961;
+  border-radius: 8px;
+  padding: 20px 30px;
+  margin: 20px 0;
+  text-align: center;
+  max-width: 500px;
+}
+
+.rank-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  color: #ffd700;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+.rank-desc {
+  color: #d4c5a9;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.btn-primary {
+  padding: 14px 35px;
+  background: linear-gradient(135deg, #c9a961, #8b6f3a);
+  border: none;
+  border-radius: 6px;
+  color: #1a0f08;
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin: 5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(201,169,97,0.4);
+}
+
+.particle {
+  position: fixed;
+  pointer-events: none;
+  font-size: 1.5rem;
+  z-index: 200;
+  animation: particleFloat 1.5s ease-out forwards;
+}
+
+@keyframes particleFloat {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--dx), -150px) scale(0.3) rotate(360deg); opacity: 0; }
+}
+
+@media (max-width: 600px) {
+  .game-header { flex-direction: column; text-align: center; }
+  .stats-row { justify-content: center; }
+  .narrative-area { padding: 25px 20px; }
+  .scene-illustration { font-size: 3rem; }
+  .narrative-text { font-size: 1.05rem; }
+}
+</style>
+</head>
+<body class="theme-default">
+
+<div class="screen active" id="screen-home">
+  <div class="logo-container">
+    <span class="logo-icon">📜</span>
+  </div>
+  <h1 class="title">Crônicas do Tempo</h1>
+  <p class="subtitle">"Cada escolha ecoa através dos séculos. Entre nas páginas da história e descubra o peso das decisões que moldaram civilizações inteiras."</p>
+  
+  <div class="periods-grid">
+    <div class="period-card egypt" onclick="startAdventure('egypt')">
+      <span class="period-icon">🏛️</span>
+      <h3 class="period-title">Egito Antigo</h3>
+      <p class="period-era">~2560 a.C. • Antigo Império</p>
+      <p class="period-desc">Você é um arquiteto real convocado pelo faraó Quéops para construir a Grande Pirâmide de Gizé. Decifre os segredos dos escribas e sobreviva às intrigas da corte.</p>
+      <span class="period-role">⚒️ Arquiteto Real</span>
+    </div>
+    <div class="period-card maya" onclick="startAdventure('maya')">
+      <span class="period-icon">🌿</span>
+      <h3 class="period-title">Civilização Maia</h3>
+      <p class="period-era">~800 d.C. • Período Clássico</p>
+      <p class="period-desc">Você é um jovem sacerdote astrônomo em Tikal. Os céus revelam presságios sombrios, e cabe a você interpretar as estrelas para salvar seu povo da fome e da guerra.</p>
+      <span class="period-role">🌟 Sacerdote Astrônomo</span>
+    </div>
+    <div class="period-card medieval" onclick="startAdventure('medieval')">
+      <span class="period-icon">⚔️</span>
+      <h3 class="period-title">Idade Média</h3>
+      <p class="period-era">~1189 d.C. • Terceira Cruzada</p>
+      <p class="period-desc">Você é um cavaleiro recém-nomeado partindo em cruzada à Terra Santa. Honra, fé e sobrevivência serão testados em cada encruzilhada do caminho.</p>
+      <span class="period-role">🛡️ Cavaleiro Cruzado</span>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <button class="btn-back" onclick="goHome()">← Abandonar</button>
+    <div class="game-title" id="game-title">📜 Crônica</div>
+    <div class="stats-row">
+      <div class="stat">
+        <span class="stat-icon">📖</span>
+        <span>Cena <span class="stat-value" id="current-scene">1</span>/<span id="total-scenes">8</span></span>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">⭐</span>
+        <span class="stat-value" id="score">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">🏅</span>
+        <span>Honra: <span class="stat-value" id="honor">50</span></span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="narrative-area" id="narrative-area"></div>
+</div>
+
+<div class="screen" id="screen-final">
+  <div class="trophy-icon" id="trophy-icon">🏆</div>
+  <h1 class="final-title" id="final-title">Fim da Crônica</h1>
+  <p class="final-message" id="final-message">Sua jornada chegou ao fim.</p>
+  
+  <div class="final-rank" id="final-rank">
+    <div class="rank-title" id="rank-title">Título</div>
+    <div class="rank-desc" id="rank-desc">Descrição</div>
+  </div>
+  
+  <div class="final-stats">
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-score">0</div>
+      <div class="final-stat-label">Pontos</div>
+    </div>
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-correct">0</div>
+      <div class="final-stat-label">Acertos</div>
+    </div>
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-honor">0</div>
+      <div class="final-stat-label">Honra</div>
+    </div>
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-ending">?</div>
+      <div class="final-stat-label">Final</div>
+    </div>
+  </div>
+  
+  <div>
+    <button class="btn-primary" onclick="goHome()">📜 Menu Principal</button>
+    <button class="btn-primary" onclick="replayAdventure()">🔄 Nova Jornada</button>
+  </div>
+</div>
+
+<div class="feedback" id="feedback"></div>
+
+<script>
+// ===== DADOS DAS AVENTURAS =====
+const ADVENTURES = {
+  egypt: {
+    theme: 'egypt',
+    title: '🏛️ Egito Antigo',
+    icon: '🏛️',
+    particles: ['✨', '🌟', '⭐', '🔱', '𓂀'],
+    scenes: [
+      {
+        chapter: 'Capítulo I',
+        title: 'O Chamado do Faraó',
+        illustration: '🏛️',
+        text: '<p>O sol escaldante do deserto castiga suas costas enquanto você caminha pelos corredores do palácio de Mênfis. Um mensageiro real o conduziu até aqui, às pressas, com uma notícia que mudaria sua vida para sempre.</p><p>O <span class="highlight">faraó Quéops</span> deseja erguer uma tumba que desafie o próprio tempo: uma pirâmide tão grandiosa que os homens a contemplarão com espanto por milênios. E ele escolheu <em>você</em> — o mais talentoso arquiteto do reino — para liderar a obra.</p><p>Ao entrar na sala do trono, o faraó o encara com olhos penetrantes.</p>',
+        quiz: {
+          prompt: '📜 O vizir pergunta: "Para que serve principalmente uma pirâmide, arquiteto?"',
+          choices: [
+            { text: 'Servir de celeiro para tempos de fome', correct: false, feedback: 'Os celeiros eram estruturas separadas. As pirâmides tinham propósito sagrado.' },
+            { text: 'Ser a tumba do faraó e sua morada eterna', correct: true, feedback: 'Correto! A pirâmide era a tumba real e garantia a passagem do faraó para o além.', score: 100 },
+            { text: 'Observar as estrelas e prever cheias', correct: false, feedback: 'Embora alinhadas astronomicamente, esse não era seu propósito principal.' },
+            { text: 'Servir de fortaleza contra invasores', correct: false, feedback: 'Pirâmides não tinham função militar.' }
+          ]
+        },
+        consequence: 'O faraó sorri satisfeito com seu conhecimento. "Você compreende a sagrada missão. Que os deuses o guiem, arquiteto."'
+      },
+      {
+        chapter: 'Capítulo II',
+        title: 'Os Operários do Nilo',
+        illustration: '👷',
+        text: '<p>Na planície de Gizé, dezenas de milhares de trabalhadores se aglomeram sob o sol. Você precisa organizar a força de trabalho — pedreiros, carregadores, escribas e cozinheiros.</p><p>Um capataz se aproxima, preocupado: "Mestre, os trabalhadores estão exaustos. A ração de cerveja e pão diminuiu, e muitos falam em revolta."</p><p>Você sabe que a construção durará <span class="highlight">20 anos</span>. Como manter a moral elevada?</p>',
+        choices: [
+          { text: 'Aumentar a carga de trabalho com ameaças de punição', correct: false, feedback: 'Trabalhadores forçados pela violência se rebelam. A pirâmide foi construída por egípcios livres e bem tratados.', honor: -15 },
+          { text: 'Reivindicar mais recursos ao faraó e melhorar as rações', correct: true, feedback: 'Sábio! Registros históricos mostram que os construtores tinham boa alimentação e cuidados médicos.', honor: 20, score: 100 },
+          { text: 'Ignorar as queixas — o faraó não pode esperar', correct: false, feedback: 'Negligenciar os trabalhadores levaria a sabotagens e abandono.', honor: -10 }
+        ],
+        consequence: 'Sua decisão sábia garante a lealdade dos operários. A construção avança com vigor renovado.'
+      },
+      {
+        chapter: 'Capítulo III',
+        title: 'O Segredo dos Escribas',
+        illustration: '📐',
+        text: '<p>Os escribas reais o convocam para uma reunião secreta. Eles precisam definir as proporções da pirâmide — um conhecimento sagrado passado de geração em geração.</p><p>"Mestre arquiteto," diz o escriba-chefe, "para que a pirâmide seja perfeita, precisamos conhecer a proporção áurea. Diga-nos: <span class="highlight">se a base tem 230 côvados, qual deve ser a altura aproximada?</span>"</p><p>Todos os olhos se voltam para você. Este é um teste de conhecimento.</p>',
+        quiz: {
+          prompt: '📐 Qual proporção era fundamental nas pirâmides de Gizé?',
+          choices: [
+            { text: 'Altura igual à base (230 côvados)', correct: false, feedback: 'Uma pirâmide tão alta quanto larga seria instável.' },
+            { text: 'Altura de aproximadamente 146 côvados (proporção áurea)', correct: true, feedback: 'Correto! A Grande Pirâmide tem cerca de 146m de altura, refletindo proporções matemáticas sagradas.', score: 150 },
+            { text: 'Altura de apenas 50 côvados', correct: false, feedback: 'Muito baixa para a grandiosidade desejada pelo faraó.' },
+            { text: 'Não há proporção definida, é aleatório', correct: false, feedback: 'Os egípcios eram mestres da matemática e usavam proporções precisas.' }
+          ]
+        },
+        consequence: 'Os escribas registram suas palavras em papiro sagrado. A pirâmide começará a tomar forma com as proporções corretas.'
+      },
+      {
+        chapter: 'Capítulo IV',
+        title: 'A Cheia do Nilo',
+        illustration: '🌊',
+        text: '<p>Durante a estação da cheia, o Nilo transborda e cobre as terras de cultivo. Os trabalhadores não podem ir às pedreiras, e os suprimentos começam a faltar.</p><p>O intendente traz más notícias: "Mestre, temos comida para apenas mais duas semanas. Se a cheia demorar, a construção parará."</p><p>Você precisa agir rapidamente.</p>',
+        choices: [
+          { text: 'Usar o tempo para treinar novos operários e planejar', correct: true, feedback: 'Estratégia brilhante! Os egípcios aproveitavam as cheias para tarefas internas.', honor: 15, score: 100 },
+          { text: 'Forçar os homens a trabalhar na lama e nas enchentes', correct: false, feedback: 'Trabalhar na cheia era perigoso e causaria mortes e revoltas.', honor: -20 },
+          { text: 'Enviar homens para caçar no deserto distante', correct: false, feedback: 'Arriscado — muitos não retornariam, e os que voltassem estariam exaustos.', honor: -5 }
+        ],
+        consequence: 'Sua sabedoria transforma a adversidade em oportunidade. Quando as águas baixam, a equipe está mais forte e unida.'
+      },
+      {
+        chapter: 'Capítulo V',
+        title: 'As Pedras de Tura',
+        illustration: '⛏️',
+        text: '<p>As pedras de calcário fino vêm das pedreiras de <span class="highlight">Tura</span>, do outro lado do Nilo. Mas um problema surge: as rampas de transporte estão se desgastando, e blocos de 2,5 toneladas caem, ferindo operários.</p><p>O mestre das pedreiras pergunta: "Como transportaremos os blocos restantes sem mais acidentes?"</p>',
+        quiz: {
+          prompt: '⛏️ Qual técnica os egípcios realmente usavam para transportar blocos gigantes?',
+          choices: [
+            { text: 'Molhar a areia à frente dos trenós para reduzir o atrito', correct: true, feedback: 'Correto! Pinturas tombológicas mostram operários molhando a areia — técnica comprovada cientificamente!', score: 150 },
+            { text: 'Usar rodas de madeira inventadas por você', correct: false, feedback: 'Rodas não eram usadas no Egito Antigo para cargas pesadas — atolariam na areia.' },
+            { text: 'Construir um canal de água para flutuar as pedras', correct: false, feedback: 'Criativo, mas impraticável para pedras de toneladas.' },
+            { text: 'Usar balões de ar quente com fogo', correct: false, feedback: 'Impossível — essa tecnologia só existiria 3.000 anos depois.' }
+          ]
+        },
+        consequence: 'Sua solução é adotada imediatamente. Os acidentes diminuem drasticamente, e a obra avança com segurança.'
+      },
+      {
+        chapter: 'Capítulo VI',
+        title: 'A Intriga da Corte',
+        illustration: '🗡️',
+        text: '<p>Uma noite, um cortesão chamado <span class="highlight">Hemiunu</span> o procura em segredo. Ele é sobrinho do faraó e ambiciona o trono.</p><p>"Arquiteto," sussurra ele, "me ajude a sabotar a pirâmide. Quando Quéops morrer, serei faraó, e você será rico além dos sonhos."</p><p>Seus olhos brilham com promessas de ouro e poder. A tentação é grande, mas o risco é mortal.</p>',
+        choices: [
+          { text: 'Denunciar a conspiração imediatamente ao faraó', correct: true, feedback: 'Lealdade inabalável! Quéops o recompensará com honras e riquezas legítimas.', honor: 30, score: 200 },
+          { text: 'Fingir aceitar para ganhar tempo e investigar', correct: false, feedback: 'Perigoso — se descoberto, seria executado por cumplicidade.', honor: -5 },
+          { text: 'Aceitar a proposta e sabotar a obra', correct: false, feedback: 'Traição! Se descoberto, você e sua família seriam eliminados.', honor: -50 },
+          { text: 'Recusar educadamente e se afastar da corte', correct: false, feedback: 'Hemiunu não deixaria testemunhas de sua oferta. Muito perigoso.', honor: -10 }
+        ],
+        consequence: 'O faraó, furioso com a traição do sobrinho, o nomeia "Guardião dos Segredos Reais". Sua honra brilha mais que o ouro.'
+      },
+      {
+        chapter: 'Capítulo VII',
+        title: 'A Câmara do Rei',
+        illustration: '⚱️',
+        text: '<p>Após anos de trabalho, você entra pela primeira vez na <span class="highlight">Câmara do Rei</span>, no coração da pirâmide. As paredes de granito vermelho polido brilham à luz das torchas.</p><p>No centro, o sarcófago vazio aguarda o momento final. Os sacerdotes realizam rituais sagrados para garantir a passagem do faraó para o <span class="highlight">Campo de Iaru</span>, o paraíso egípcio.</p><p>O sumo sacerdote pergunta: "Qual deus guiará Quéops em sua jornada noturna pelo Duat?"</p>',
+        quiz: {
+          prompt: '⚱️ Qual deus era fundamental na jornada após a morte?',
+          choices: [
+            { text: 'Rá, o deus do sol diurno', correct: false, feedback: 'Rá governa o dia. A jornada noturna pertence a outro deus.' },
+            { text: 'Osíris, senhor do submundo e da ressurreição', correct: true, feedback: 'Correto! Osíris preside o julgamento e a vida após a morte.', score: 150 },
+            { text: 'Seth, deus do caos e das tempestades', correct: false, feedback: 'Seth era associado ao mal e à desordem.' },
+            { text: 'Bastet, a deusa-gata protetora', correct: false, feedback: 'Bastet protegia os vivos, não os mortos.' }
+          ]
+        },
+        consequence: 'Os sacerdotes o recebem como um iniciado nos mistérios. Você compreende agora o verdadeiro significado da obra.'
+      },
+      {
+        chapter: 'Capítulo VIII',
+        title: 'O Legado Eterno',
+        illustration: '🌅',
+        text: '<p>Vinte anos se passaram. A Grande Pirâmide está completa, brilhando sob o sol com seu revestimento de calcário branco de Tura. Ela se ergue a <span class="highlight">146 metros</span> — a estrutura mais alta já construída pela humanidade.</p><p>Na cerimônia final, o faraó Quéops, já idoso, o chama diante de toda a corte.</p><p>"Arquiteto, você realizou o impossível. Seu nome será lembrado enquanto esta pirâmide existir. Que honra você deseja?"</p>',
+        choices: [
+          { text: 'Pedir uma pequena tumba próxima à pirâmide real', correct: true, feedback: 'Humildade sábia. Ser enterrado perto do faraó era a maior honra — e muitas tumbas de arquitetos foram realmente encontradas em Gizé!', honor: 25, score: 200 },
+          { text: 'Exigir ouro suficiente para viver como faraó', correct: false, feedback: 'Arrogância perigosa — ofenderia o faraó diante de toda a corte.', honor: -20 },
+          { text: 'Pedir que seu nome seja gravado na pirâmide', correct: false, feedback: 'A pirâmide era do faraó, não do arquiteto. Seria uma afronta.', honor: -15 },
+          { text: 'Recusar qualquer recompensa e partir em silêncio', correct: false, feedback: 'Humilde, mas o faraó se sentiria em dívida. Melhor aceitar com moderação.', honor: 5 }
+        ],
+        consequence: 'Seu nome é gravado em uma tumba próxima à grande obra. Milênios depois, arqueólogos encontrarão seu túmulo, e sua história será contada para sempre.'
+      }
+    ],
+    endings: {
+      high: { title: '🌟 O Imortal de Gizé', desc: 'Você se tornou uma lenda. Seu nome ecoa através dos milênios ao lado dos faraós. A pirâmide que você ergueu ainda hoje desafia o tempo.' },
+      medium: { title: '⚖️ O Arquiteto Respeitado', desc: 'Você completou a obra e viveu com honra. Embora não tenha alcançado a imortalidade, sua família prosperou por gerações.' },
+      low: { title: '💀 O Esquecido nas Areias', desc: 'Suas decisões ruins o levaram à desgraça. Seu nome foi apagado dos registros, e a história o esqueceu.' }
+    }
+  },
+  
+  maya: {
+    theme: 'maya',
+    title: '🌿 Civilização Maia',
+    icon: '🌿',
+    particles: ['🌿', '🌺', '✨', '🦜', '🌽'],
+    scenes: [
+      {
+        chapter: 'Capítulo I',
+        title: 'Os Céus de Tikal',
+        illustration: '🌌',
+        text: '<p>A noite é quente e úmida na selva de Petén. Do alto do <span class="highlight">Templo do Grande Jaguar</span>, em Tikal, você observa as estrelas com olhos atentos.</p><p>Você é <span class="highlight">Balam</span>, um jovem sacerdote astrônomo recém-iniciado nos mistérios do calendário sagrado. Seu mestre, o velho Ah Kin, o chamou para uma tarefa urgente.</p><p>"As estrelas falam, Balam. Vênus se aproxima de sua posição mais perigosa. O <span class="highlight">Kukulkán</span>, a Serpente Emplumada, exige nossa atenção."</p>',
+        quiz: {
+          prompt: '🌟 Qual era a importância de Vênus para os maias?',
+          choices: [
+            { text: 'Era apenas uma estrela bonita sem significado', correct: false, feedback: 'Os maias eram astrônomos sofisticados — cada planeta tinha significado.' },
+            { text: 'Era associada a guerras, sacrifícios e eventos importantes', correct: true, feedback: 'Correto! Vênus regia ciclos de guerra e rituais no calendário maia.', score: 150 },
+            { text: 'Representava a deusa da chuva', correct: false, feedback: 'A chuva era associada a Chaac, não a Vênus.' },
+            { text: 'Marcava o início do ano novo solar', correct: false, feedback: 'O ano solar era marcado por outros eventos astronômicos.' }
+          ]
+        },
+        consequence: 'O velho Ah Kin sorri. "Você compreende os céus. Logo será você quem os interpretará para o ajaw (rei)."'
+      },
+      {
+        chapter: 'Capítulo II',
+        title: 'O Calendário Sagrado',
+        illustration: '🗓️',
+        text: '<p>No dia seguinte, o <span class="highlight">ajaw</span> (rei) de Tikal convoca todos os sacerdotes. Há um problema grave: as chuvas estão atrasadas, e a colheita de milho — base da alimentação — está em risco.</p><p>"Sacerdotes," diz o ajaw, "precisamos saber quando plantar. O calendário nos dirá?"</p><p>Você sabe que os maias usavam múltiplos calendários sobrepostos.</p>',
+        quiz: {
+          prompt: '🗓️ Quantos dias tinha o calendário solar maia (Haab)?',
+          choices: [
+            { text: '360 dias', correct: false, feedback: 'O Tun tinha 360 dias, mas não era o calendário solar completo.' },
+            { text: '365 dias, como o nosso ano solar', correct: true, feedback: 'Correto! O Haab tinha 365 dias (18 meses de 20 dias + 5 dias "azarados").', score: 150 },
+            { text: '260 dias', correct: false, feedback: '260 dias era o Tzolkin, o calendário ritual sagrado.' },
+            { text: '584 dias', correct: false, feedback: '584 era o ciclo de Vênus, não o ano solar.' }
+          ]
+        },
+        consequence: 'Com seu conhecimento, você aconselha o ajaw sobre o momento exato do plantio. Os campos serão abençoados.'
+      },
+      {
+        chapter: 'Capítulo III',
+        title: 'A Seca Ameaçadora',
+        illustration: '🌵',
+        text: '<p>Apesar dos rituais, a seca persiste. Os cenotes (poços sagrados) estão secando, e o povo começa a passar fome. O ajaw convoca uma reunião de emergência.</p><p>"Devemos realizar um grande sacrifício para apaziguar <span class="highlight">Chaac</span>, o deus da chuva?" pergunta o sumo sacerdote.</p><p>Todos olham para você. Sua opinião pode mudar o destino de Tikal.</p>',
+        choices: [
+          { text: 'Apoiar o sacrifício humano tradicional no cenote', correct: false, feedback: 'Os sacrifícios humanos existiam, mas eram extremos. Há alternativas.', honor: -10 },
+          { text: 'Sugerir observação astronômica e rituais com sangue real', correct: true, feedback: 'Sábio! Os maias praticavam autosacrifício (sangria) da realeza em crises — mais comum que sacrifícios humanos.', honor: 20, score: 150 },
+          { text: 'Propor abandonar Tikal e migrar para outra cidade', correct: false, feedback: 'Abandonar a cidade sagrada seria desonroso e causaria pânico.', honor: -15 },
+          { text: 'Dizer que os deuses estão irados e nada pode ser feito', correct: false, feedback: 'Um sacerdote nunca deve perder a fé publicamente.', honor: -20 }
+        ],
+        consequence: 'O ajaw, impressionado com sua sabedoria, realiza o ritual de sangria. Dias depois, as chuvas finalmente chegam.'
+      },
+      {
+        chapter: 'Capítulo IV',
+        title: 'A Guerra com Calakmul',
+        illustration: '⚔️',
+        text: '<p>Mensageiros chegam ofegantes: a poderosa cidade de <span class="highlight">Calakmul</span>, rival histórica de Tikal, mobiliza seus guerreiros. Atacarão em lua nova.</p><p>O ajaw consulta os augúrios. "Balam, o que dizem as estrelas? Devemos lutar ou negociar?"</p><p>Você precisa interpretar os presságios celestes com precisão.</p>',
+        quiz: {
+          prompt: '⭐ O que era um "glifo emblema" maia?',
+          choices: [
+            { text: 'Um enfeite decorativo sem significado', correct: false, feedback: 'Os glifos emblema tinham profunda importância política.' },
+            { text: 'Um símbolo que identificava uma cidade-estado e sua dinastia', correct: true, feedback: 'Correto! Cada cidade-estado tinha seu glifo emblema único, como um brasão.', score: 150 },
+            { text: 'Um calendário astronômico', correct: false, feedback: 'Calendários eram representados por outros tipos de glifos.' },
+            { text: 'Um nome de deus específico', correct: false, feedback: 'Nomes de deuses eram glifos diferentes dos emblemas.' }
+          ]
+        },
+        consequence: 'Seu conhecimento dos símbolos fortalece a identidade de Tikal. Os guerreiros lutam com renovado orgulho.'
+      },
+      {
+        chapter: 'Capítulo V',
+        title: 'A Batalha na Selva',
+        illustration: '🏹',
+        text: '<p>A batalha ocorre na densa selva. Os guerreiros de Tikal, armados com <span class="highlight">obsidianas</span> e lanças, enfrentam os invasores.</p><p>Você, embora sacerdote, está no campo. Um guerreiro inimigo cai ferido aos seus pés. Ele implora por misericórdia.</p>',
+        choices: [
+          { text: 'Poupar sua vida e levá-lo como prisioneiro valioso', correct: true, feedback: 'Prisioneiros eram valiosos para resgate ou informação. Misericórdia estratégica!', honor: 20, score: 150 },
+          { text: 'Sacrificá-lo imediatamente aos deuses', correct: false, feedback: 'Sacerdotes não deviam executar — era papel dos guerreiros.', honor: -15 },
+          { text: 'Abandoná-lo para morrer na selva', correct: false, feedback: 'Cruel e desperdiçador. Poderia ser uma fonte de informação.', honor: -10 }
+        ],
+        consequence: 'O prisioneiro, grato, revela os planos de Calakmul. Tikal se prepara melhor para os próximos embates.'
+      },
+      {
+        chapter: 'Capítulo VI',
+        title: 'Os Mistérios de Kukulkán',
+        illustration: '🐍',
+        text: '<p>Após a vitória, você é levado ao templo principal para um ritual sagrado. O sumo sacerdote o inicia nos mistérios mais profundos da <span class="highlight">Serpente Emplumada</span>.</p><p>"Balam," diz ele, "para compreender Kukulkán, responda: <span class="highlight">qual fenômeno ocorre em Chichén Itzá durante os equinócios?</span>"</p>',
+        choices: [
+          { text: 'A sombra forma uma serpente descendo a pirâmide', correct: true, feedback: 'Correto! O efeito de luz e sombra cria uma serpente que "desce" os degraus de El Castillo.', score: 200, honor: 15 },
+          { text: 'A pirâmide brilha com luz dourada', correct: false, feedback: 'O fenômeno é específico: a sombra em forma de serpente.', honor: -5 },
+          { text: 'Chove flores do topo do templo', correct: false, feedback: 'Embora poético, não é o fenômeno real.', honor: -5 },
+          { text: 'Ocorre um eclipse solar exato', correct: false, feedback: 'Eclipses são eventos separados dos equinócios.', honor: -5 }
+        ],
+        consequence: 'Você é reconhecido como um verdadeiro Ah Kin — um guardião do conhecimento sagrado. Os deuses sorriem para você.'
+      },
+      {
+        chapter: 'Capítulo VII',
+        title: 'A Colheita Abençoada',
+        illustration: '🌽',
+        text: '<p>Com suas previsões precisas, a colheita é abundante. O milho cresce alto, o cacau floresce, e Tikal prospera. O povo o celebra como herói.</p><p>Mas o velho Ah Kin, agora doente, o chama para uma conversa final.</p><p>"Balam, meu tempo se aproxima do fim. Quem você escolherá como seu aprendiz? O conhecimento não pode morrer."</p>',
+        choices: [
+          { text: 'Uma jovem talentosa da cidade, contra a tradição', correct: true, feedback: 'Há evidências de mulheres sacerdotisas maias. Escolher pelo talento, não pelo gênero, é sábio.', honor: 25, score: 150 },
+          { text: 'Seu próprio filho, mesmo sem talento', correct: false, feedback: 'Nepotismo enfraquece a tradição. O conhecimento merece o melhor guardião.', honor: -10 },
+          { text: 'Recusar-se a escolher — o conhecimento deve morrer com você', correct: false, feedback: 'Egoísta. O conhecimento é sagrado e deve ser transmitido.', honor: -25 }
+        ],
+        consequence: 'Sua aprendiz se tornará uma das mais respeitadas Ah Kin de Tikal. O legado do conhecimento continua.'
+      },
+      {
+        chapter: 'Capítulo VIII',
+        title: 'O Legado das Estrelas',
+        illustration: '🌠',
+        text: '<p>Anos se passam. Você se torna o <span class="highlight">sumo sacerdote</span> de Tikal. Seus códices são estudados por gerações, e seu nome é gravado em estelas de pedra.</p><p>Em uma noite estrelada, do alto do Templo do Grande Jaguar, você olha para o céu e reflete sobre sua jornada.</p><p>Qual será seu último ensinamento ao povo de Tikal?</p>',
+        choices: [
+          { text: '"As estrelas guiam, mas as mãos humanas constroem o destino"', correct: true, feedback: 'Filosofia equilibrada entre destino e ação — verdadeira sabedoria maia.', honor: 30, score: 200 },
+          { text: '"Obedeçam aos deuses sem questionar"', correct: false, feedback: 'Os maias valorizavam o conhecimento, não a cega obediência.', honor: -10 },
+          { text: '"Somente eu detinha a verdade — esqueçam tudo"', correct: false, feedback: 'Arrogância que destruiria séculos de sabedoria acumulada.', honor: -30 }
+        ],
+        consequence: 'Suas palavras são gravadas em um códice sagrado. Séculos depois, quando os espanhóis chegarem, alguns códices serão escondidos — e sobreviverão para contar sua história.'
+      }
+    ],
+    endings: {
+      high: { title: '🌟 O Ah Kin Eterno', desc: 'Você se tornou o maior sacerdote astrônomo de Tikal. Seus códices sobreviveram ao tempo e às conquistas, iluminando gerações futuras.' },
+      medium: { title: '⚖️ O Sacerdote Respeitado', desc: 'Você viveu com honra e serviu bem aos deuses. Seu nome é lembrado nas cerimônias anuais de Tikal.' },
+      low: { title: '💀 O Esquecido na Selva', desc: 'A selva reclamou seu legado. Nenhum códice carrega seu nome, e os ventos apagaram suas pegadas.' }
+    }
+  },
+  
+  medieval: {
+    theme: 'medieval',
+    title: '⚔️ Idade Média',
+    icon: '⚔️',
+    particles: ['⚔️', '🛡️', '✨', '🏰', '🔥'],
+    scenes: [
+      {
+        chapter: 'Capítulo I',
+        title: 'A Nomeação do Cavaleiro',
+        illustration: '🏰',
+        text: '<p>O sino da catedral ecoa pela cidade de <span class="highlight">Rouen</span>, na Normandia. Você, um jovem escudeiro, ajoelha-se diante de seu senhor.</p><p>A espada toca seu ombro esquerdo, depois o direito. A voz do senhor ressoa: <em>"Levante-se, <span class="highlight">Sir Guillaume</span>. Que Deus e São Jorge guiem sua espada."</em></p><p>Você é agora um cavaleiro. E o Papa acabou de convocar a <span class="highlight">Terceira Cruzada</span> (1189) para reconquistar Jerusalém.</p>',
+        quiz: {
+          prompt: '⚔️ Qual era o lema dos cavaleiros templários?',
+          choices: [
+            { text: '"Deus vult" (Deus o quer)', correct: false, feedback: 'Este era o grito de guerra da Primeira Cruzada, não o lema templário.' },
+            { text: '"Non nobis, Domine" — Não a nós, Senhor, mas ao Teu nome dá glória', correct: true, feedback: 'Correto! Lema baseado no Salmo 115, adotado pelos Templários.', score: 150 },
+            { text: '"Morte aos infiéis"', correct: false, feedback: 'Grito de guerra, não lema oficial da ordem.' },
+            { text: '"Honra e coragem"', correct: false, feedback: 'Valores medievais, mas não o lema templário específico.' }
+          ]
+        },
+        consequence: 'Seu conhecimento da ordem impressiona seu senhor. Você decide partir para a Terra Santa.'
+      },
+      {
+        chapter: 'Capítulo II',
+        title: 'A Jornada pela Europa',
+        illustration: '🗺️',
+        text: '<p>Você parte com um pequeno grupo: dois escudeiros, um padre e um mercador. A rota passa pela <span class="highlight">Alemanha</span>, depois pelo <span class="highlight">Império Bizantino</span>.</p><p>Nas montanhas dos Bálcãs, bandidos atacam sua caravana. Após breve combate, você captura o líder dos bandidos.</p><p>Ele implora: "Senhor cavaleiro, poupe-me! Sou pai de família, roubo por necessidade!"</p>',
+        choices: [
+          { text: 'Executá-lo como exemplo para os outros', correct: false, feedback: 'Cruel e desnecessário. A cavalaria cristã pregava misericórdia.', honor: -20 },
+          { text: 'Perdoá-lo e oferecer-lhe lugar em sua comitiva', correct: true, feedback: 'Misericórdia cristã! Muitos bandidos eram camponeses desesperados pela fome.', honor: 25, score: 150 },
+          { text: 'Entregá-lo às autoridades da próxima cidade', correct: false, feedback: 'Correto legalmente, mas perde a chance de um ato de clemência.', honor: 5 },
+          { text: 'Exigir resgate em ouro por sua liberdade', correct: false, feedback: 'Avarento. Um cavaleiro cristão deve mostrar misericórdia.', honor: -10 }
+        ],
+        consequence: 'O bandido, grato, torna-se um servo leal. Sua fama de cavaleiro justo se espalha.'
+      },
+      {
+        chapter: 'Capítulo III',
+        title: 'Constantinopla Magnífica',
+        illustration: '🕌',
+        text: '<p>Você chega a <span class="highlight">Constantinopla</span>, a maior cidade da cristandade. A <span class="highlight">Hagia Sophia</span> o deixa sem palavras — sua cúpula parece tocar o próprio céu.</p><p>O imperador bizantino <span class="highlight">Isaac II Angelus</span> o recebe, mas há tensão. Os cruzados são vistos com desconfiança pelos bizantinos.</p><p>Um nobre bizantino o desafia: "Cavaleiro do ocidente, prove sua cultura. <span class="highlight">Qual era a língua oficial do Império Bizantino?</span>"</p>',
+        quiz: {
+          prompt: '📜 Qual era a língua oficial do Império Bizantino no século XII?',
+          choices: [
+            { text: 'Latim, como no antigo Império Romano', correct: false, feedback: 'O latim era usado em documentos oficiais antigos, mas não era mais a língua viva.' },
+            { text: 'Grego, herdeiro da tradição helênica', correct: true, feedback: 'Correto! O Império Bizantino era culturalmente grego, embora se considerasse romano.', score: 150 },
+            { text: 'Árabe, por proximidade com o oriente', correct: false, feedback: 'O árabe era dos rivais muçulmanos, não dos bizantinos.' },
+            { text: 'Francês, pela influência das cruzadas', correct: false, feedback: 'Os cruzados é que falavam francês, não os bizantinos.' }
+          ]
+        },
+        consequence: 'O nobre bizantino, impressionado, o convida para um banquete. Alianças se formam nas cortes.'
+      },
+      {
+        chapter: 'Capítulo IV',
+        title: 'O Cerco de Acre',
+        illustration: '🏹',
+        text: '<p>Após meses de viagem, você chega a <span class="highlight">Acre</span>, cidade portuária da Terra Santa. Ela está sitiada pelos cruzados há dois anos.</p><p>O rei <span class="highlight">Ricardo Coração de Leão</span> acaba de chegar com reforços. Você é convocado para o conselho de guerra.</p><p>"Sir Guillaume," diz o rei, "nossos engenheiros sugerem usar manganas para derrubar as muralhas. O que aconselha?"</p>',
+        choices: [
+          { text: 'Apoiar o ataque frontal — a honra exige coragem', correct: false, feedback: 'Ataques frontais a muralhas causavam enormes baixas. Estratégia ruim.', honor: -10 },
+          { text: 'Sugerir cerco prolongado e bloqueio de suprimentos', correct: true, feedback: 'Estratégia correta! Acre caiu em 1191 após fome e negociações, não por ataque direto.', honor: 20, score: 150 },
+          { text: 'Propor traição subornando guardas internos', correct: false, feedback: 'Desonroso. Cavaleiros cristãos deviam vencer com honra.', honor: -25 },
+          { text: 'Recuar e esperar mais reforços', correct: false, feedback: 'Covarde. Dois anos de cerco já foram suficientes.', honor: -15 }
+        ],
+        consequence: 'O rei aceita seu conselho. Após semanas de bloqueio, Acre se rende. A vitória é sua.'
+      },
+      {
+        chapter: 'Capítulo V',
+        title: 'O Encontro com Saladino',
+        illustration: '👑',
+        text: '<p>O grande sultão <span class="highlight">Saladino</span>, líder muçulmano, é conhecido por seu <span class="highlight">cavalheirismo</span> mesmo entre os inimigos. Em uma trégua, ele envia um mensageiro a Ricardo.</p><p>Você é escolhido como emissário. Ao encontrar Saladino, ele o recebe com honras — algo raro entre inimigos.</p><p>"Cavaleiro cristão," diz Saladino, "diga-me: qual virtude um verdadeiro cavaleiro deve ter acima de todas?"</p>',
+        quiz: {
+          prompt: '🛡️ Qual era o código de conduta dos cavaleiros medievais?',
+          choices: [
+            { text: 'A força bruta e a conquista a qualquer custo', correct: false, feedback: 'Isso era ser um bárbaro, não um cavaleiro.' },
+            { text: 'A cavalaria: coragem, lealdade, misericórdia e proteção aos fracos', correct: true, feedback: 'Correto! O código de cavalaria definia a nobreza medieval.', score: 150 },
+            { text: 'A obediência cega ao senhor feudal', correct: false, feedback: 'Importante, mas não definia toda a conduta cavaleiresca.' },
+            { text: 'A riqueza e o poder territorial', correct: false, feedback: 'Valores materiais, não espirituais da cavalaria.' }
+          ]
+        },
+        consequence: 'Saladino sorri. "Você é um verdadeiro cavaleiro, Sir Guillaume." Ele lhe presenteia com um cavalo árabe magnífico.'
+      },
+      {
+        chapter: 'Capítulo VI',
+        title: 'A Batalha de Jaffa',
+        illustration: '⚔️',
+        text: '<p>A <span class="highlight">Batalha de Jaffa</span> (1192) é o confronto final. Ricardo, com poucos homens, enfrenta um exército muito maior de Saladino.</p><p>No calor da batalha, você se vê isolado. Um jovem escudeiro muçulmano, desmontado, está ferido aos seus pés. Seus próprios homens pedem sua cabeça.</p>',
+        choices: [
+          { text: 'Protegê-lo e levá-lo aos seus curandeiros', correct: true, feedback: 'Verdadeira cavalaria! Ricardo e Saladino eram conhecidos por atos assim.', honor: 30, score: 200 },
+          { text: 'Executá-lo — é um inimigo em batalha', correct: false, feedback: 'Desonroso. Um jovem ferido não é ameaça, e matá-lo viola a cavalaria.', honor: -25 },
+          { text: 'Abandoná-lo e seguir lutando', correct: false, feedback: 'Covarde e cruel. Cavaleiros protegem os caídos.', honor: -15 }
+        ],
+        consequence: 'O jovem, filho de um emir, é curado. Dias depois, seu pai liberta prisioneiros cristãos em gratidão. A misericórdia vence a guerra.'
+      },
+      {
+        chapter: 'Capítulo VII',
+        title: 'O Tratado de Paz',
+        illustration: '📜',
+        text: '<p>Após a batalha, Ricardo e Saladino negociam o <span class="highlight">Tratado de Jaffa</span> (setembro de 1192). Jerusalém permanece sob controle muçulmano, mas peregrinos cristãos podem visitá-la.</p><p>Você está presente na assinatura. Ricardo, cansado, pergunta: "Sir Guillaume, a cruzada falhou em recuperar Jerusalém. Valeu a pena?"</p>',
+        choices: [
+          { text: '"Sim, majestade — garantimos a segurança dos peregrinos"', correct: true, feedback: 'Resposta sábia e verdadeira. Este foi o principal resultado da Terceira Cruzada.', honor: 25, score: 150 },
+          { text: '"Não, foi um fracasso total"', correct: false, feedback: 'Injusto. A cruzada teve conquistas importantes, como Acre e Jaffa.', honor: -10 },
+          { text: '"Devemos voltar com um exército maior"', correct: false, feedback: 'Mais guerra traria mais morte. A paz é mais nobre.', honor: -15 }
+        ],
+        consequence: 'Ricardo concorda. "Você tem sabedoria de sacerdote, Sir Guillaume. Voltemos para casa."'
+      },
+      {
+        chapter: 'Capítulo VIII',
+        title: 'O Retorno à Normandia',
+        illustration: '🌅',
+        text: '<p>Anos depois, você está em suas terras na <span class="highlight">Normandia</span>. É um homem mudado — mais sábio, mais humilde.</p><p>Seu jovem sobrinho, ansioso para se tornar cavaleiro, pergunta: "Tio, qual o maior ensinamento que a cruzada lhe deu?"</p>',
+        choices: [
+          { text: '"Que o verdadeiro inimigo não é quem pensa diferente, mas a ignorância em nosso coração"', correct: true, feedback: 'Sabedoria profunda! Você transcendeu os conflitos religiosos.', honor: 30, score: 200 },
+          { text: '"Que os muçulmanos são inimigos cruéis e devem ser destruídos"', correct: false, feedback: 'Falso — Saladino era mais cavaleiro que muitos cristãos. Preconceito não é sabedoria.', honor: -30 },
+          { text: '"Que a guerra é gloriosa e todos devem buscá-la"', correct: false, feedback: 'Guerra nunca é gloriosa. Quem viveu batalhas sabe do horror.', honor: -25 }
+        ],
+        consequence: 'Seu sobrinho o escuta com olhos brilhantes. Ele se tornará um cavaleiro diferente — mais justo, mais sábio. Seu legado viverá através dele.'
+      }
+    ],
+    endings: {
+      high: { title: '🌟 O Cavaleiro Lendário', desc: 'Seu nome entra para as crônicas ao lado de Ricardo e Saladino. Você personificou o ideal de cavalaria: coragem, misericórdia e sabedoria.' },
+      medium: { title: '⚖️ O Cavaleiro Honrado', desc: 'Você voltou para casa com honra. Seu brasão é respeitado na Normandia, e sua família prospera por gerações.' },
+      low: { title: '💀 O Cavaleiro Esquecido', desc: 'A cruzada o corrompeu. Você voltou amargo, e seu nome foi apagado das crônicas por suas ações desonrosas.' }
+    }
+  }
+};
+
+// ===== ESTADO DO JOGO =====
+let game = {
+  adventureKey: null,
+  adventure: null,
+  currentScene: 0,
+  score: 0,
+  honor: 50,
+  correctAnswers: 0,
+  totalQuizzes: 0,
+  startTime: null,
+  locked: false
+};
+
+// ===== NAVEGAÇÃO =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goHome() {
+  document.body.className = 'theme-default';
+  showScreen('screen-home');
+}
+
+// ===== INICIAR AVENTURA =====
+function startAdventure(periodKey) {
+  try {
+    game = {
+      adventureKey: periodKey,
+      adventure: ADVENTURES[periodKey],
+      currentScene: 0,
+      score: 0,
+      honor: 50,
+      correctAnswers: 0,
+      totalQuizzes: 0,
+      startTime: Date.now(),
+      locked: false
+    };
+    
+    document.body.className = 'theme-' + periodKey;
+    document.getElementById('game-title').textContent = game.adventure.title;
+    document.getElementById('total-scenes').textContent = game.adventure.scenes.length;
+    
+    showScreen('screen-game');
+    updateUI();
+    renderScene();
+  } catch (err) {
+    console.error('Erro ao iniciar aventura:', err);
+    alert('Erro ao iniciar a aventura. Tente novamente.');
+  }
+}
+
+function replayAdventure() {
+  if (game.adventureKey && ADVENTURES[game.adventureKey]) {
+    startAdventure(game.adventureKey);
+  } else {
+    goHome();
+  }
+}
+
+// ===== UI =====
+function updateUI() {
+  document.getElementById('current-scene').textContent = game.currentScene + 1;
+  document.getElementById('score').textContent = game.score;
+  document.getElementById('honor').textContent = game.honor;
+}
+
+// ===== RENDERIZAR CENA =====
+function renderScene() {
+  try {
+    if (game.currentScene >= game.adventure.scenes.length) {
+      showFinal();
+      return;
+    }
+    
+    const scene = game.adventure.scenes[game.currentScene];
+    const area = document.getElementById('narrative-area');
+    
+    let html = `
+      <div class="scene-header">
+        <div class="scene-chapter">${scene.chapter}</div>
+        <div class="scene-title">${scene.title}</div>
+      </div>
+      <div class="scene-illustration">${scene.illustration}</div>
+      <div class="narrative-text">${scene.text}</div>
+    `;
+    
+    if (scene.quiz) {
+      game.totalQuizzes++;
+      html += `<div class="quiz-prompt">${scene.quiz.prompt}</div>`;
+      html += `<div class="choices-container" id="choices-container">`;
+      scene.quiz.choices.forEach((choice, i) => {
+        const letter = ['A', 'B', 'C', 'D'][i];
+        html += `
+          <button class="choice-btn" data-index="${i}" data-type="quiz">
+            <span class="choice-letter">${letter}.</span>
+            <span class="choice-text">${choice.text}</span>
+          </button>
+        `;
+      });
+      html += `</div>`;
+    } else if (scene.choices) {
+      html += `<div class="choices-container" id="choices-container">`;
+      scene.choices.forEach((choice, i) => {
+        const letter = ['A', 'B', 'C', 'D'][i];
+        html += `
+          <button class="choice-btn" data-index="${i}" data-type="choice">
+            <span class="choice-letter">${letter}.</span>
+            <span class="choice-text">${choice.text}</span>
+          </button>
+        `;
+      });
+      html += `</div>`;
+    }
+    
+    html += `<div id="feedback-area"></div>`;
+    
+    area.innerHTML = html;
+    
+    // Adiciona event listeners nos botões
+    document.querySelectorAll('.choice-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const index = parseInt(this.getAttribute('data-index'));
+        const type = this.getAttribute('data-type');
+        makeChoice(index, type);
+      });
+    });
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) {
+    console.error('Erro ao renderizar cena:', err);
+  }
+}
+
+// ===== FAZER ESCOLHA =====
+function makeChoice(index, type) {
+  if (game.locked) return;
+  game.locked = true;
+  
+  try {
+    const scene = game.adventure.scenes[game.currentScene];
+    const choices = type === 'quiz' ? scene.quiz.choices : scene.choices;
+    const choice = choices[index];
+    
+    // Desabilitar todos os botões
+    document.querySelectorAll('.choice-btn').forEach((btn, i) => {
+      btn.classList.add('disabled');
+      if (i === index) {
+        btn.classList.add(choice.correct ? 'correct' : 'wrong');
+      }
+      if (!choice.correct && choices[i].correct) {
+        setTimeout(() => btn.classList.add('correct'), 500);
+      }
+    });
+    
+    // Aplicar consequências
+    if (type === 'quiz' && choice.correct) {
+      game.correctAnswers++;
+      game.score += (choice.score || 100);
+      showFeedback('success', '✅ Resposta correta! +' + (choice.score || 100) + ' pontos');
+      createParticles();
+    } else if (type === 'quiz' && !choice.correct) {
+      showFeedback('error', '❌ Resposta incorreta');
+    } else if (type === 'choice') {
+      if (choice.correct) {
+        game.score += (choice.score || 100);
+        showFeedback('success', '✅ Escolha sábia! +' + (choice.score || 100) + ' pontos');
+        createParticles();
+      } else {
+        showFeedback('error', '⚠️ Escolha questionável...');
+      }
+    }
+    
+    if (choice.honor) {
+      game.honor = Math.max(0, Math.min(100, game.honor + choice.honor));
+    }
+    
+    updateUI();
+    
+    // Mostrar feedback narrativo
+    setTimeout(() => {
+      const feedbackArea = document.getElementById('feedback-area');
+      if (!feedbackArea) return;
+      
+      let feedbackHtml = `<div class="choice-feedback ${choice.correct ? 'positive' : 'negative'}">`;
+      feedbackHtml += `<p>${choice.feedback}</p>`;
+      if (scene.consequence) {
+        feedbackHtml += `<p style="margin-top: 10px; color: #c9a961; font-style: italic;">${scene.consequence}</p>`;
+      }
+      feedbackHtml += `</div>`;
+      feedbackHtml += `<button class="btn-continue" id="btn-continue">Continuar →</button>`;
+      feedbackArea.innerHTML = feedbackHtml;
+      
+      document.getElementById('btn-continue').addEventListener('click', nextScene);
+    }, 800);
+  } catch (err) {
+    console.error('Erro ao processar escolha:', err);
+    game.locked = false;
+  }
+}
+
+// ===== PRÓXIMA CENA =====
+function nextScene() {
+  game.currentScene++;
+  game.locked = false;
+  updateUI();
+  renderScene();
+}
+
+// ===== FEEDBACK =====
+function showFeedback(type, message) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback ' + type;
+  fb.innerHTML = message;
+  fb.classList.add('show');
+  setTimeout(() => fb.classList.remove('show'), 2200);
+}
+
+// ===== PARTÍCULAS =====
+function createParticles() {
+  const emojis = game.adventure.particles;
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    p.style.left = (40 + Math.random() * 20) + '%';
+    p.style.top = '50%';
+    p.style.setProperty('--dx', (Math.random() * 300 - 150) + 'px');
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1500);
+  }
+}
+
+// ===== TELA FINAL =====
+function showFinal() {
+  const accuracy = game.totalQuizzes > 0 ? Math.round((game.correctAnswers / game.totalQuizzes) * 100) : 0;
+  
+  let ending, trophy;
+  if (game.honor >= 80 && accuracy >= 70) {
+    ending = game.adventure.endings.high;
+    trophy = '👑';
+  } else if (game.honor >= 50 && accuracy >= 40) {
+    ending = game.adventure.endings.medium;
+    trophy = '🏆';
+  } else {
+    ending = game.adventure.endings.low;
+    trophy = '💀';
+  }
+  
+  document.getElementById('trophy-icon').textContent = trophy;
+  document.getElementById('final-title').textContent = ending.title;
+  document.getElementById('final-message').textContent = ending.desc;
+  document.getElementById('rank-title').textContent = ending.title;
+  document.getElementById('rank-desc').textContent = ending.desc;
+  
+  document.getElementById('final-score').textContent = game.score;
+  document.getElementById('final-correct').textContent = game.correctAnswers + '/' + game.totalQuizzes;
+  document.getElementById('final-honor').textContent = game.honor;
+  document.getElementById('final-ending').textContent = trophy;
+  
+  showScreen('screen-final');
+}
+</script>
+
+</body>
+</html>
+

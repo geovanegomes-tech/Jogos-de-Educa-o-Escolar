@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linguagem Viva - Ortografia & Gramática</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/playfair-display@5.0.19/index.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.16/index.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-dark: #1a1033;
+  --bg-mid: #2d1b4e;
+  --bg-light: #3d2a5f;
+  --gold: #f5c542;
+  --gold-dark: #d4a017;
+  --amber: #ff9f43;
+  --emerald: #2ecc71;
+  --ruby: #e74c3c;
+  --text: #f5e6d3;
+  --text-dim: #b8a8c8;
+  --paper: #faf3e0;
+}
+
+body {
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-mid) 50%, var(--bg-light) 100%);
+  color: var(--text);
+  overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(245,197,66,0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(255,159,67,0.08) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Letras flutuantes decorativas */
+.floating-letters {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.floating-letter {
+  position: absolute;
+  font-family: 'Playfair Display', serif;
+  color: rgba(245,197,66,0.06);
+  font-size: 4rem;
+  font-weight: 900;
+  animation: floatLetter 20s linear infinite;
+}
+
+@keyframes floatLetter {
+  0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+}
+
+.screen {
+  display: none;
+  min-height: 100vh;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+  animation: fadeIn 0.6s ease;
+}
+.screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+@keyframes correctGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(46,204,113,0.5); }
+  50% { box-shadow: 0 0 40px rgba(46,204,113,0.8); }
+}
+
+/* ===== TELA INICIAL ===== */
+.logo-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.logo-icon {
+  font-size: 5rem;
+  display: inline-block;
+  animation: pulse 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 30px rgba(245,197,66,0.5));
+}
+
+.title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  font-weight: 900;
+  background: linear-gradient(90deg, var(--gold), var(--amber), var(--gold));
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+  animation: shimmer 4s ease infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 700px;
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.modes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  max-width: 1100px;
+  width: 100%;
+}
+
+.mode-card {
+  background: rgba(255,255,255,0.04);
+  border: 2px solid rgba(245,197,66,0.2);
+  border-radius: 16px;
+  padding: 28px 22px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  backdrop-filter: blur(15px);
+  position: relative;
+  overflow: hidden;
+}
+
+.mode-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(245,197,66,0.15), transparent);
+  transition: left 0.6s;
+}
+
+.mode-card:hover::before { left: 100%; }
+
+.mode-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--gold);
+  box-shadow: 0 15px 40px rgba(245,197,66,0.2);
+}
+
+.mode-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.mode-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--gold);
+  position: relative;
+  z-index: 1;
+}
+
+.mode-desc {
+  color: var(--text-dim);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.mode-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(245,197,66,0.15);
+  color: var(--gold);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== HEADER DO JOGO ===== */
+.game-header {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 22px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(245,197,66,0.2);
+  border-radius: 14px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(15px);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.game-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gold);
+}
+
+.stats-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.stat-icon { font-size: 1.15rem; }
+.stat-value { color: var(--gold); font-weight: 700; }
+
+.lives-display {
+  display: flex;
+  gap: 3px;
+}
+
+.life {
+  font-size: 1.2rem;
+  transition: all 0.3s;
+}
+
+.life.lost {
+  opacity: 0.2;
+  filter: grayscale(1);
+}
+
+.btn-back {
+  background: rgba(245,197,66,0.1);
+  border: 1px solid rgba(245,197,66,0.3);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.btn-back:hover { background: rgba(245,197,66,0.25); }
+
+/* ===== ÁREA DO JOGO ===== */
+.game-area {
+  width: 100%;
+  max-width: 900px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(245,197,66,0.2);
+  border-radius: 20px;
+  padding: 35px;
+  backdrop-filter: blur(10px);
+  min-height: 450px;
+  position: relative;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 25px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--amber));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(245,197,66,0.5);
+}
+
+.question-label {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.question-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 25px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* ===== FORCA DE ACENTUAÇÃO ===== */
+.hangman-container {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.word-display {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: 8px;
+  color: var(--gold);
+  margin: 20px 0;
+  text-shadow: 0 0 20px rgba(245,197,66,0.3);
+  word-break: break-word;
+}
+
+.word-hint {
+  font-size: 1rem;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-bottom: 15px;
+}
+
+.word-category {
+  display: inline-block;
+  padding: 5px 14px;
+  background: rgba(245,197,66,0.15);
+  color: var(--gold);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.option-btn {
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(245,197,66,0.25);
+  border-radius: 12px;
+  padding: 18px 15px;
+  color: var(--text);
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.option-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 0; height: 100%;
+  background: linear-gradient(90deg, rgba(245,197,66,0.15), transparent);
+  transition: width 0.4s;
+}
+
+.option-btn:hover::before { width: 100%; }
+
+.option-btn:hover {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(245,197,66,0.2);
+}
+
+.option-btn.correct {
+  background: rgba(46,204,113,0.25);
+  border-color: var(--emerald);
+  color: var(--emerald);
+  animation: correctGlow 0.8s;
+}
+
+.option-btn.wrong {
+  background: rgba(231,76,60,0.25);
+  border-color: var(--ruby);
+  color: var(--ruby);
+  animation: shake 0.4s;
+}
+
+.option-btn.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ===== ACORDO ORTOGRÁFICO ===== */
+.spell-comparison {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 15px;
+  align-items: center;
+  margin: 25px 0;
+  padding: 20px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 14px;
+  border: 1px solid rgba(245,197,66,0.15);
+}
+
+.spell-word {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 15px;
+  background: rgba(245,197,66,0.08);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 2px solid transparent;
+}
+
+.spell-word:hover {
+  background: rgba(245,197,66,0.15);
+  border-color: var(--gold);
+}
+
+.spell-word.correct {
+  background: rgba(46,204,113,0.25);
+  border-color: var(--emerald);
+  color: var(--emerald);
+}
+
+.spell-word.wrong {
+  background: rgba(231,76,60,0.25);
+  border-color: var(--ruby);
+  color: var(--ruby);
+  animation: shake 0.4s;
+}
+
+.spell-vs {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: var(--gold);
+  font-style: italic;
+}
+
+.explanation-box {
+  background: rgba(245,197,66,0.08);
+  border-left: 4px solid var(--gold);
+  padding: 15px 20px;
+  border-radius: 0 10px 10px 0;
+  margin-top: 20px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text);
+  animation: slideUp 0.4s ease;
+}
+
+.explanation-box strong {
+  color: var(--gold);
+}
+
+/* ===== SINÔNIMOS ===== */
+.synonym-target {
+  text-align: center;
+  margin: 25px 0;
+  padding: 25px;
+  background: linear-gradient(135deg, rgba(245,197,66,0.1), rgba(255,159,67,0.05));
+  border-radius: 14px;
+  border: 2px solid rgba(245,197,66,0.3);
+}
+
+.synonym-word {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 900;
+  color: var(--gold);
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+.synonym-class {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+/* ===== LACUNAS ===== */
+.sentence-container {
+  background: rgba(250,243,224,0.05);
+  border: 1px solid rgba(245,197,66,0.2);
+  border-radius: 14px;
+  padding: 25px;
+  margin: 20px 0;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.sentence-text {
+  font-family: 'Playfair Display', serif;
+  color: var(--text);
+}
+
+.blank {
+  display: inline-block;
+  min-width: 120px;
+  padding: 4px 12px;
+  border-bottom: 3px solid var(--gold);
+  color: var(--gold);
+  font-weight: 700;
+  margin: 0 4px;
+  transition: all 0.3s;
+}
+
+.blank.filled {
+  background: rgba(245,197,66,0.15);
+  border-radius: 6px;
+  border-bottom: none;
+}
+
+.blank.correct {
+  background: rgba(46,204,113,0.25);
+  color: var(--emerald);
+  border-bottom-color: var(--emerald);
+}
+
+.blank.wrong {
+  background: rgba(231,76,60,0.25);
+  color: var(--ruby);
+  border-bottom-color: var(--ruby);
+}
+
+/* ===== FEEDBACK FLUTUANTE ===== */
+.feedback {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  padding: 15px 30px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  z-index: 1000;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feedback.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.feedback.success {
+  background: linear-gradient(135deg, var(--emerald), #27ae60);
+  color: #fff;
+}
+
+.feedback.error {
+  background: linear-gradient(135deg, var(--ruby), #c0392b);
+  color: #fff;
+}
+
+/* ===== TELA FINAL ===== */
+.trophy-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.final-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 900;
+  background: linear-gradient(90deg, var(--gold), var(--amber), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+}
+
+.final-message {
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: 30px;
+  max-width: 600px;
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.final-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  max-width: 700px;
+  width: 100%;
+  margin: 20px 0 30px;
+}
+
+.final-stat {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(245,197,66,0.2);
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.final-stat-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--gold);
+  margin-bottom: 5px;
+}
+
+.final-stat-label {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.btn-primary {
+  padding: 14px 35px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  border: none;
+  border-radius: 10px;
+  color: var(--bg-dark);
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin: 5px;
+  letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(245,197,66,0.4);
+}
+
+.btn-continue {
+  display: block;
+  margin: 25px auto 0;
+  padding: 12px 35px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  border: none;
+  border-radius: 10px;
+  color: var(--bg-dark);
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 1px;
+}
+
+.btn-continue:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(245,197,66,0.4);
+}
+
+/* ===== PARTÍCULAS ===== */
+.particle {
+  position: fixed;
+  pointer-events: none;
+  font-size: 1.8rem;
+  z-index: 200;
+  animation: particleFloat 1.2s ease-out forwards;
+}
+
+@keyframes particleFloat {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--dx), -150px) scale(0.3) rotate(360deg); opacity: 0; }
+}
+
+/* ===== FORCA VISUAL ===== */
+.hangman-svg {
+  width: 150px;
+  height: 180px;
+  margin: 0 auto 15px;
+}
+
+.hangman-svg line, .hangman-svg circle {
+  stroke: var(--gold);
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  opacity: 0.2;
+  transition: opacity 0.4s;
+}
+
+.hangman-svg .visible {
+  opacity: 1;
+}
+
+@media (max-width: 600px) {
+  .game-header { flex-direction: column; text-align: center; }
+  .stats-row { justify-content: center; }
+  .game-area { padding: 25px 18px; }
+  .spell-comparison { grid-template-columns: 1fr; gap: 10px; }
+  .spell-vs { transform: rotate(90deg); }
+  .word-display { letter-spacing: 4px; }
+}
+</style>
+</head>
+<body>
+
+<div class="floating-letters" id="floating-letters"></div>
+
+<!-- TELA INICIAL -->
+<div class="screen active" id="screen-home">
+  <div class="logo-container">
+    <span class="logo-icon">📚</span>
+  </div>
+  <h1 class="title">Linguagem Viva</h1>
+  <p class="subtitle">"As palavras são a vestimenta do pensamento. Domine a ortografia, a acentuação e o significado — e vista-se com elegância."</p>
+  
+  <div class="modes-grid">
+    <div class="mode-card" onclick="startGame('hangman')">
+      <span class="mode-icon">🎯</span>
+      <h3 class="mode-title">Forca de Acentuação</h3>
+      <p class="mode-desc">Descubra a acentuação correta das palavras e desvie da forca! Um desafio clássico com foco em regras acentuais.</p>
+      <span class="mode-tag">📝 Acentuação Gráfica</span>
+    </div>
+    <div class="mode-card" onclick="startGame('spelling')">
+      <span class="mode-icon">📖</span>
+      <h3 class="mode-title">Novo Acordo</h3>
+      <p class="mode-desc">Identifique a grafia correta segundo o Novo Acordo Ortográfico. O que mudou? Teste seus conhecimentos!</p>
+      <span class="mode-tag">✒️ Ortografia</span>
+    </div>
+    <div class="mode-card" onclick="startGame('synonyms')">
+      <span class="mode-icon">🔗</span>
+      <h3 class="mode-title">Sinônimos</h3>
+      <p class="mode-desc">Enriqueça seu vocabulário associando palavras aos seus sinônimos corretos em tempo recorde.</p>
+      <span class="mode-tag">💬 Vocabulário</span>
+    </div>
+    <div class="mode-card" onclick="startGame('fillblank')">
+      <span class="mode-icon">✍️</span>
+      <h3 class="mode-title">Lacunas Textuais</h3>
+      <p class="mode-desc">Complete frases com a palavra correta. Contexto, gramática e ortografia em um só desafio.</p>
+      <span class="mode-tag">📄 Coerência Textual</span>
+    </div>
+  </div>
+</div>
+
+<!-- TELA DO JOGO -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <button class="btn-back" onclick="goHome()">← Menu</button>
+    <div class="game-title" id="game-title">🎮 Modo</div>
+    <div class="stats-row">
+      <div class="stat">
+        <span class="stat-icon">📊</span>
+        <span><span class="stat-value" id="current-level">1</span>/<span id="total-levels">10</span></span>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">⭐</span>
+        <span class="stat-value" id="score">0</span>
+      </div>
+      <div class="stat" id="lives-stat">
+        <span class="stat-icon">❤️</span>
+        <div class="lives-display" id="lives-display"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="game-area">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+    </div>
+    <div id="game-content"></div>
+  </div>
+</div>
+
+<!-- TELA FINAL -->
+<div class="screen" id="screen-final">
+  <div class="trophy-icon" id="trophy-icon">🏆</div>
+  <h1 class="final-title" id="final-title">Jornada Completa!</h1>
+  <p class="final-message" id="final-message">Parabéns!</p>
+  
+  <div class="final-stats">
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-score">0</div>
+      <div class="final-stat-label">Pontos</div>
+    </div>
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-hits">0</div>
+      <div class="final-stat-label">Acertos</div>
+    </div>
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-accuracy">0%</div>
+      <div class="final-stat-label">Precisão</div>
+    </div>
+    <div class="final-stat">
+      <div class="final-stat-value" id="final-rank">-</div>
+      <div class="final-stat-label">Rank</div>
+    </div>
+  </div>
+  
+  <div>
+    <button class="btn-primary" onclick="goHome()">🏠 Menu Principal</button>
+    <button class="btn-primary" onclick="restartGame()">🔄 Jogar Novamente</button>
+  </div>
+</div>
+
+<!-- FEEDBACK -->
+<div class="feedback" id="feedback"></div>
+
+<script>
+// ===== LETRAS FLUTUANTES DECORATIVAS =====
+function createFloatingLetters() {
+  const container = document.getElementById('floating-letters');
+  const letters = ['Á','É','Í','Ó','Ú','Ã','Õ','Ç','Â','Ê','A','B','C','Z','ã','õ','á','é'];
+  for (let i = 0; i < 15; i++) {
+    const letter = document.createElement('div');
+    letter.className = 'floating-letter';
+    letter.textContent = letters[Math.floor(Math.random() * letters.length)];
+    letter.style.left = Math.random() * 100 + '%';
+    letter.style.animationDelay = Math.random() * 20 + 's';
+    letter.style.animationDuration = (15 + Math.random() * 15) + 's';
+    letter.style.fontSize = (2 + Math.random() * 4) + 'rem';
+    container.appendChild(letter);
+  }
+}
+createFloatingLetters();
+
+// ===== DADOS DO JOGO =====
+
+// Modo 1: Forca de Acentuação
+const HANGMAN_WORDS = [
+  { word: 'idéia', correct: 'ideia', hint: 'Pensamento, conceito', category: 'Substantivo', options: ['ideia', 'idéia', 'idéia', 'îdeia'], rule: 'Paroxítona terminada em "ei" não leva acento (Novo Acordo).' },
+  { word: 'herói', correct: 'herói', hint: 'Persona de coragem', category: 'Substantivo', options: ['heroi', 'herói', 'herôí', 'hérói'], rule: 'Oxítona terminada em "oi" leva acento.' },
+  { word: 'você', correct: 'você', hint: 'Pronome de tratamento', category: 'Pronome', options: ['voce', 'você', 'você', 'vôce'], rule: 'Oxítona terminada em "e" leva acento.' },
+  { word: 'café', correct: 'café', hint: 'Bebida brasileira', category: 'Substantivo', options: ['cafe', 'café', 'cáfe', 'cafê'], rule: 'Oxítona terminada em "e" leva acento.' },
+  { word: 'parabéns', correct: 'parabéns', hint: 'Felicitações', category: 'Interjeição', options: ['parabens', 'parabéns', 'parabêns', 'párabens'], rule: 'Oxítona terminada em "ens" leva acento.' },
+  { word: 'juízes', correct: 'juízes', hint: 'Magistrados', category: 'Substantivo', options: ['juizes', 'juízes', 'juíses', 'júizes'], rule: 'Hiato "i" e "u" tônicos levam acento.' },
+  { word: 'saúde', correct: 'saúde', hint: 'Estado de bem-estar', category: 'Substantivo', options: ['saude', 'saúde', 'sáude', 'saûde'], rule: 'Hiato "u" tônico após vogal leva acento.' },
+  { word: 'história', correct: 'história', hint: 'Narrativa do passado', category: 'Substantivo', options: ['historia', 'história', 'histórea', 'hístoria'], rule: 'Paroxítona terminada em ditongo leva acento.' },
+  { word: 'fácil', correct: 'fácil', hint: 'Sem dificuldade', category: 'Adjetivo', options: ['facil', 'fácil', 'fácíl', 'fàcil'], rule: 'Paroxítona terminada em "l" leva acento.' },
+  { word: 'médico', correct: 'médico', hint: 'Profissional da saúde', category: 'Substantivo', options: ['medico', 'médico', 'medíco', 'méddico'], rule: 'Proparoxítona sempre leva acento.' },
+  { word: 'último', correct: 'último', hint: 'Derradeiro', category: 'Adjetivo', options: ['ultimo', 'último', 'ultímo', 'últime'], rule: 'Paroxítona com "u" tônico após vogal leva acento.' },
+  { word: 'ciúme', correct: 'ciúme', hint: 'Sentimento de posse', category: 'Substantivo', options: ['ciume', 'ciúme', 'cíume', 'ciumé'], rule: 'Hiato "u" tônico leva acento.' }
+];
+
+// Modo 2: Novo Acordo Ortográfico
+const SPELLING_WORDS = [
+  { old: 'assembléia', correct: 'assembleia', rule: 'Paroxítonas com "ei" perderam o acento no Novo Acordo (2009).' },
+  { old: 'herói', correct: 'herói', rule: 'Oxítonas com "oi" MANTÊM o acento. Não confunda com paroxítonas!' },
+  { old: 'enjôo', correct: 'enjoo', rule: 'Hiatos "oo" perderam o acento circunflexo.' },
+  { old: 'vôo', correct: 'voo', rule: 'Hiatos "oo" perderam o acento circunflexo.' },
+  { old: 'pára', correct: 'para', rule: 'O acento diferencial de "pára" (verbo) foi retirado.' },
+  { old: 'pêlo', correct: 'pelo', rule: 'O acento diferencial de "pêlo" foi retirado.' },
+  { old: 'idéia', correct: 'ideia', rule: 'Paroxítonas com "ei" perderam o acento.' },
+  { old: 'heróico', correct: 'heroico', rule: 'Paroxítonas com "oi" perderam o acento.' },
+  { old: 'freqüente', correct: 'frequente', rule: 'O trema foi abolido em todas as palavras.' },
+  { old: 'lingüiça', correct: 'linguiça', rule: 'O trema foi abolido em todas as palavras.' },
+  { old: 'microondas', correct: 'micro-ondas', rule: 'Palavras com prefixo terminado em vogal + "o" mantêm hífen.' },
+  { old: 'autoescola', correct: 'autoescola', rule: 'Prefixo terminado em vogal + vogal diferente: sem hífen.' },
+  { old: 'antiinflamatório', correct: 'anti-inflamatório', rule: 'Prefixo terminado em vogal + "h" ou mesma vogal: com hífen.' },
+  { old: 'subentender', correct: 'subentender', rule: 'Prefixo terminado em consoante + "r" ou "s": dobra-se a consoante, sem hífen.' },
+  { old: 'sub-região', correct: 'sub-região', rule: 'Prefixo terminado em consoante + "r": mantém hífen quando não dobra.' }
+];
+
+// Modo 3: Sinônimos
+const SYNONYMS = [
+  { word: 'belo', correct: 'formoso', class: 'Adjetivo', options: ['feio', 'formoso', 'enorme', 'triste'] },
+  { word: 'rápido', correct: 'veloz', class: 'Adjetivo', options: ['lento', 'veloz', 'pesado', 'claro'] },
+  { word: 'antônimo de alegre', correct: 'triste', class: 'Adjetivo', options: ['feliz', 'triste', 'contente', 'animado'] },
+  { word: 'contente', correct: 'satisfeito', class: 'Adjetivo', options: ['triste', 'irritado', 'satisfeito', 'cansado'] },
+  { word: 'casa', correct: 'lar', class: 'Substantivo', options: ['carro', 'lar', 'rua', 'praça'] },
+  { word: 'corajoso', correct: 'valente', class: 'Adjetivo', options: ['covarde', 'valente', 'fraco', 'tímido'] },
+  { word: 'antônimo de antigo', correct: 'moderno', class: 'Adjetivo', options: ['velho', 'moderno', 'novo', 'recente'] },
+  { word: 'inteligente', correct: 'sagaz', class: 'Adjetivo', options: ['burro', 'sagaz', 'lento', 'fraco'] },
+  { word: 'início', correct: 'começo', class: 'Substantivo', options: ['fim', 'começo', 'meio', 'final'] },
+  { word: 'difícil', correct: 'árduo', class: 'Adjetivo', options: ['fácil', 'árduo', 'simples', 'leve'] },
+  { word: 'antônimo de generoso', correct: 'avarento', class: 'Adjetivo', options: ['bondoso', 'avarento', 'alegre', 'educado'] },
+  { word: 'trabalhar', correct: 'labutar', class: 'Verbo', options: ['descansar', 'labutar', 'dormir', 'fugir'] }
+];
+
+// Modo 4: Lacunas Textuais
+const FILL_BLANKS = [
+  { sentence: 'Os alunos ___ atentos à aula do professor.', correct: 'permaneceram', options: ['permaneceram', 'permanecerão', 'permaneciam', 'permanecesse'], hint: 'Verbo no pretérito perfeito' },
+  { sentence: 'Não ___ nada a declarar.', correct: 'há', options: ['a', 'há', 'à', 'ah'], hint: 'Verbo haver no sentido de existir' },
+  { sentence: 'Vou ___ casa de meus pais.', correct: 'à', options: ['a', 'à', 'há', 'ah'], hint: 'Crase antes de substantivo feminino' },
+  { sentence: 'O menino ___ o livro na estante.', correct: 'pôs', correct2: 'pos', options: ['pôs', 'pó', 'poz', 'poz'], hint: 'Verbo pôr no pretérito perfeito' },
+  { sentence: 'Ela ___ muito inteligente.', correct: 'é', options: ['é', 'e', 'ê', 'he'], hint: 'Verbo ser na 3ª pessoa do singular' },
+  { sentence: '___ muito tempo não o vejo.', correct: 'Há', options: ['A', 'Há', 'À', 'Ah'], hint: 'Verbo haver indicando tempo' },
+  { sentence: 'Fui ___ feira comprar frutas.', correct: 'à', options: ['a', 'à', 'há', 'ah'], hint: 'Crase antes de substantivo feminino' },
+  { sentence: 'Ele ___ de viajar amanhã.', correct: 'gosta', options: ['gosta', 'gosta-se', 'gostam', 'gostaria'], hint: 'Verbo gostar na 3ª pessoa' },
+  { sentence: 'As crianças ___ no parque.', correct: 'brincam', options: ['brincam', 'brincão', 'brinca', 'brincou'], hint: 'Verbo no presente, 3ª pessoa do plural' },
+  { sentence: 'Não ___ dúvidas sobre isso.', correct: 'há', options: ['a', 'há', 'à', 'ah'], hint: 'Verbo haver = existir' },
+  { sentence: 'Ela chegou ___ atrasada.', correct: 'um pouco', options: ['um pouco', 'humpouco', 'umpoco', 'hum pouco'], hint: 'Locução adverbial de intensidade' },
+  { sentence: 'O livro ___ sobre a mesa.', correct: 'está', options: ['está', 'estar', 'estã', 'esta'], hint: 'Verbo estar na 3ª pessoa' }
+];
+
+// ===== ESTADO =====
+let game = {
+  mode: null,
+  level: 0,
+  total: 10,
+  score: 0,
+  hits: 0,
+  attempts: 0,
+  lives: 5,
+  maxLives: 5,
+  startTime: null,
+  items: [],
+  locked: false,
+  hangmanParts: 0
+};
+
+// ===== NAVEGAÇÃO =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goHome() {
+  showScreen('screen-home');
+}
+
+// ===== INICIAR JOGO =====
+function startGame(mode) {
+  game = {
+    mode,
+    level: 0,
+    total: 10,
+    score: 0,
+    hits: 0,
+    attempts: 0,
+    lives: 5,
+    maxLives: 5,
+    startTime: Date.now(),
+    items: shuffle(getItemsForMode(mode)).slice(0, 10),
+    locked: false,
+    hangmanParts: 0
+  };
+  
+  const titles = {
+    hangman: '🎯 Forca de Acentuação',
+    spelling: '📖 Novo Acordo Ortográfico',
+    synonyms: '🔗 Sinônimos',
+    fillblank: '✍️ Lacunas Textuais'
+  };
+  document.getElementById('game-title').textContent = titles[mode];
+  document.getElementById('total-levels').textContent = game.total;
+  
+  showScreen('screen-game');
+  updateUI();
+  renderLevel();
+}
+
+function restartGame() {
+  startGame(game.mode);
+}
+
+function getItemsForMode(mode) {
+  if (mode === 'hangman') return [...HANGMAN_WORDS];
+  if (mode === 'spelling') return [...SPELLING_WORDS];
+  if (mode === 'synonyms') return [...SYNONYMS];
+  if (mode === 'fillblank') return [...FILL_BLANKS];
+  return [];
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ===== UI =====
+function updateUI() {
+  document.getElementById('current-level').textContent = game.level + 1;
+  document.getElementById('score').textContent = game.score;
+  
+  const livesDisplay = document.getElementById('lives-display');
+  livesDisplay.innerHTML = '';
+  for (let i = 0; i < game.maxLives; i++) {
+    const life = document.createElement('span');
+    life.className = 'life' + (i >= game.lives ? ' lost' : '');
+    life.textContent = '❤️';
+    livesDisplay.appendChild(life);
+  }
+  
+  document.getElementById('progress-fill').style.width = (game.level / game.total * 100) + '%';
+}
+
+// ===== RENDERIZAR NÍVEL =====
+function renderLevel() {
+  if (game.level >= game.total || game.lives <= 0) {
+    showFinal();
+    return;
+  }
+  
+  const item = game.items[game.level];
+  const content = document.getElementById('game-content');
+  
+  if (game.mode === 'hangman') renderHangman(item, content);
+  else if (game.mode === 'spelling') renderSpelling(item, content);
+  else if (game.mode === 'synonyms') renderSynonyms(item, content);
+  else if (game.mode === 'fillblank') renderFillBlank(item, content);
+}
+
+// ===== MODO 1: FORCA DE ACENTUAÇÃO =====
+function renderHangman(item, content) {
+  // Mostrar a palavra sem acento
+  const wordNoAccent = removeAccents(item.correct);
+  const displayWord = wordNoAccent.toUpperCase().split('').join(' ');
+  
+  content.innerHTML = `
+    <div class="hangman-container">
+      <svg class="hangman-svg" viewBox="0 0 150 180">
+        <line x1="20" y1="170" x2="130" y2="170" class="${game.hangmanParts > 0 ? 'visible' : ''}"/>
+        <line x1="50" y1="170" x2="50" y2="20" class="${game.hangmanParts > 1 ? 'visible' : ''}"/>
+        <line x1="50" y1="20" x2="100" y2="20" class="${game.hangmanParts > 2 ? 'visible' : ''}"/>
+        <line x1="100" y1="20" x2="100" y2="40" class="${game.hangmanParts > 3 ? 'visible' : ''}"/>
+        <circle cx="100" cy="55" r="15" class="${game.hangmanParts > 4 ? 'visible' : ''}"/>
+        <line x1="100" y1="70" x2="100" y2="110" class="${game.hangmanParts > 5 ? 'visible' : ''}"/>
+        <line x1="100" y1="85" x2="80" y2="100" class="${game.hangmanParts > 6 ? 'visible' : ''}"/>
+        <line x1="100" y1="85" x2="120" y2="100" class="${game.hangmanParts > 7 ? 'visible' : ''}"/>
+        <line x1="100" y1="110" x2="85" y2="135" class="${game.hangmanParts > 8 ? 'visible' : ''}"/>
+        <line x1="100" y1="110" x2="115" y2="135" class="${game.hangmanParts > 9 ? 'visible' : ''}"/>
+      </svg>
+      <div class="word-category">${item.category}</div>
+      <div class="word-display">${displayWord}</div>
+      <div class="word-hint">💡 ${item.hint}</div>
+    </div>
+    <div class="question-label">Qual é a forma corretamente acentuada?</div>
+    <div class="options-grid">
+      ${item.options.map((opt, i) => `
+        <button class="option-btn" data-answer="${opt}">${opt}</button>
+      `).join('')}
+    </div>
+    <div id="feedback-area"></div>
+  `;
+  
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      handleHangmanAnswer(this.getAttribute('data-answer'), item);
+    });
+  });
+}
+
+function removeAccents(str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function handleHangmanAnswer(answer, item) {
+  if (game.locked) return;
+  game.locked = true;
+  game.attempts++;
+  
+  const correct = answer === item.correct;
+  
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.classList.add('disabled');
+    if (btn.getAttribute('data-answer') === item.correct) {
+      btn.classList.add('correct');
+    }
+    if (btn.getAttribute('data-answer') === answer && !correct) {
+      btn.classList.add('wrong');
+    }
+  });
+  
+  if (correct) {
+    game.hits++;
+    game.score += 100;
+    showFeedback('success', '✅ Correto! +100 pontos');
+    createParticles();
+  } else {
+    game.lives--;
+    game.hangmanParts = Math.min(10, game.hangmanParts + 2);
+    showFeedback('error', '❌ Errado! -1 vida');
+  }
+  
+  updateUI();
+  
+  setTimeout(() => {
+    const feedbackArea = document.getElementById('feedback-area');
+    if (feedbackArea) {
+      feedbackArea.innerHTML = `
+        <div class="explanation-box">
+          <strong>📚 Regra:</strong> ${item.rule}
+        </div>
+        <button class="btn-continue" id="btn-continue">Continuar →</button>
+      `;
+      document.getElementById('btn-continue').addEventListener('click', nextLevel);
+    }
+  }, 800);
+}
+
+// ===== MODO 2: ACORDO ORTOGRÁFICO =====
+function renderSpelling(item, content) {
+  // Gerar a forma "errada" (antiga)
+  const wrongForm = item.old;
+  const correctForm = item.correct;
+  
+  // Decidir ordem aleatória
+  const order = Math.random() > 0.5 ? [correctForm, wrongForm] : [wrongForm, correctForm];
+  
+  content.innerHTML = `
+    <div class="question-label">Escolha a grafia CORRETA segundo o Novo Acordo Ortográfico</div>
+    <div class="question-text">Qual forma está correta?</div>
+    <div class="spell-comparison">
+      <div class="spell-word" data-answer="${order[0]}">${order[0]}</div>
+      <div class="spell-vs">ou</div>
+      <div class="spell-word" data-answer="${order[1]}">${order[1]}</div>
+    </div>
+    <div id="feedback-area"></div>
+  `;
+  
+  document.querySelectorAll('.spell-word').forEach(el => {
+    el.addEventListener('click', function() {
+      handleSpellingAnswer(this.getAttribute('data-answer'), item);
+    });
+  });
+}
+
+function handleSpellingAnswer(answer, item) {
+  if (game.locked) return;
+  game.locked = true;
+  game.attempts++;
+  
+  const correct = answer === item.correct;
+  
+  document.querySelectorAll('.spell-word').forEach(el => {
+    if (el.getAttribute('data-answer') === item.correct) {
+      el.classList.add('correct');
+    }
+    if (el.getAttribute('data-answer') === answer && !correct) {
+      el.classList.add('wrong');
+    }
+  });
+  
+  if (correct) {
+    game.hits++;
+    game.score += 100;
+    showFeedback('success', '✅ Correto! +100 pontos');
+    createParticles();
+  } else {
+    game.lives--;
+    showFeedback('error', '❌ Errado! -1 vida');
+  }
+  
+  updateUI();
+  
+  setTimeout(() => {
+    const feedbackArea = document.getElementById('feedback-area');
+    if (feedbackArea) {
+      feedbackArea.innerHTML = `
+        <div class="explanation-box">
+          <strong>📚 Explicação:</strong> ${item.rule}
+        </div>
+        <button class="btn-continue" id="btn-continue">Continuar →</button>
+      `;
+      document.getElementById('btn-continue').addEventListener('click', nextLevel);
+    }
+  }, 800);
+}
+
+// ===== MODO 3: SINÔNIMOS =====
+function renderSynonyms(item, content) {
+  const shuffledOptions = shuffle(item.options);
+  
+  content.innerHTML = `
+    <div class="question-label">Encontre o sinônimo correto</div>
+    <div class="synonym-target">
+      <div class="synonym-word">${item.word}</div>
+      <div class="synonym-class">${item.class}</div>
+    </div>
+    <div class="question-text">Qual palavra tem significado semelhante?</div>
+    <div class="options-grid">
+      ${shuffledOptions.map(opt => `
+        <button class="option-btn" data-answer="${opt}">${opt}</button>
+      `).join('')}
+    </div>
+    <div id="feedback-area"></div>
+  `;
+  
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      handleSynonymAnswer(this.getAttribute('data-answer'), item);
+    });
+  });
+}
+
+function handleSynonymAnswer(answer, item) {
+  if (game.locked) return;
+  game.locked = true;
+  game.attempts++;
+  
+  const correct = answer === item.correct;
+  
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.classList.add('disabled');
+    if (btn.getAttribute('data-answer') === item.correct) {
+      btn.classList.add('correct');
+    }
+    if (btn.getAttribute('data-answer') === answer && !correct) {
+      btn.classList.add('wrong');
+    }
+  });
+  
+  if (correct) {
+    game.hits++;
+    game.score += 100;
+    showFeedback('success', '✅ Correto! +100 pontos');
+    createParticles();
+  } else {
+    game.lives--;
+    showFeedback('error', `❌ O sinônimo de "${item.word}" é "${item.correct}"`);
+  }
+  
+  updateUI();
+  
+  setTimeout(() => {
+    const feedbackArea = document.getElementById('feedback-area');
+    if (feedbackArea) {
+      feedbackArea.innerHTML = `
+        <button class="btn-continue" id="btn-continue">Continuar →</button>
+      `;
+      document.getElementById('btn-continue').addEventListener('click', nextLevel);
+    }
+  }, 1200);
+}
+
+// ===== MODO 4: LACUNAS =====
+function renderFillBlank(item, content) {
+  const shuffledOptions = shuffle(item.options);
+  
+  content.innerHTML = `
+    <div class="question-label">Complete a frase corretamente</div>
+    <div class="sentence-container">
+      <div class="sentence-text">
+        ${item.sentence.replace('___', '<span class="blank" id="blank">______</span>')}
+      </div>
+    </div>
+    ${item.hint ? `<div style="text-align:center;color:var(--text-dim);font-style:italic;margin-bottom:15px;">💡 ${item.hint}</div>` : ''}
+    <div class="options-grid">
+      ${shuffledOptions.map(opt => `
+        <button class="option-btn" data-answer="${opt}">${opt}</button>
+      `).join('')}
+    </div>
+    <div id="feedback-area"></div>
+  `;
+  
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      handleFillBlankAnswer(this.getAttribute('data-answer'), item);
+    });
+  });
+}
+
+function handleFillBlankAnswer(answer, item) {
+  if (game.locked) return;
+  game.locked = true;
+  game.attempts++;
+  
+  const correct = answer === item.correct;
+  const blank = document.getElementById('blank');
+  
+  blank.textContent = answer;
+  blank.classList.add('filled');
+  
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.classList.add('disabled');
+    if (btn.getAttribute('data-answer') === item.correct) {
+      btn.classList.add('correct');
+    }
+    if (btn.getAttribute('data-answer') === answer && !correct) {
+      btn.classList.add('wrong');
+    }
+  });
+  
+  if (correct) {
+    game.hits++;
+    game.score += 100;
+    blank.classList.add('correct');
+    showFeedback('success', '✅ Perfeito! +100 pontos');
+    createParticles();
+  } else {
+    game.lives--;
+    blank.classList.add('wrong');
+    showFeedback('error', `❌ A resposta correta era "${item.correct}"`);
+  }
+  
+  updateUI();
+  
+  setTimeout(() => {
+    const feedbackArea = document.getElementById('feedback-area');
+    if (feedbackArea) {
+      feedbackArea.innerHTML = `
+        <button class="btn-continue" id="btn-continue">Continuar →</button>
+      `;
+      document.getElementById('btn-continue').addEventListener('click', nextLevel);
+    }
+  }, 1200);
+}
+
+// ===== PRÓXIMO NÍVEL =====
+function nextLevel() {
+  game.level++;
+  game.locked = false;
+  updateUI();
+  renderLevel();
+}
+
+// ===== FEEDBACK =====
+function showFeedback(type, message) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback ' + type;
+  fb.innerHTML = message;
+  fb.classList.add('show');
+  setTimeout(() => fb.classList.remove('show'), 2000);
+}
+
+// ===== PARTÍCULAS =====
+function createParticles() {
+  const emojis = ['✨', '📚', '✏️', '📖', '🎓', '💡'];
+  for (let i = 0; i < 10; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    p.style.left = (40 + Math.random() * 20) + '%';
+    p.style.top = '50%';
+    p.style.setProperty('--dx', (Math.random() * 300 - 150) + 'px');
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1200);
+  }
+}
+
+// ===== TELA FINAL =====
+function showFinal() {
+  const accuracy = game.attempts > 0 ? Math.round((game.hits / game.attempts) * 100) : 0;
+  
+  let rank, trophy, message;
+  if (accuracy >= 90) {
+    rank = 'Mestre';
+    trophy = '👑';
+    message = 'Excepcional! Você é um verdadeiro mestre das palavras!';
+  } else if (accuracy >= 70) {
+    rank = 'Expert';
+    trophy = '🏆';
+    message = 'Muito bem! Seu domínio da língua é impressionante!';
+  } else if (accuracy >= 50) {
+    rank = 'Aprendiz';
+    trophy = '📚';
+    message = 'Bom trabalho! Continue praticando para aprimorar seu vocabulário!';
+  } else {
+    rank = 'Iniciante';
+    trophy = '✏️';
+    message = 'Não desista! A prática leva à perfeição linguística!';
+  }
+  
+  document.getElementById('trophy-icon').textContent = trophy;
+  document.getElementById('final-title').textContent = 'Jornada Completa!';
+  document.getElementById('final-message').textContent = message;
+  document.getElementById('final-score').textContent = game.score;
+  document.getElementById('final-hits').textContent = game.hits + '/' + game.attempts;
+  document.getElementById('final-accuracy').textContent = accuracy + '%';
+  document.getElementById('final-rank').textContent = rank;
+  
+  showScreen('screen-final');
+}
+</script>
+
+</body>
+</html>
+
